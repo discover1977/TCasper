@@ -17,8 +17,8 @@ const int AP_MODE_PIN = D5;
 
 #define MAX_COORDS_ARR  10
 
-const char* ap_ssid = "Casper";
-const char* ap_password = "Casper1110";
+const char* ap_ssid = "TCasper";
+const char* ap_password = "Casper8266";
 
 struct Param {
   uint32_t ChipID;
