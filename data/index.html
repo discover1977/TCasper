@@ -2,11 +2,11 @@
 <html>
 	<head>
 		<meta name='viewport' content='width=device-width, initial-scale=1', charset="utf-8">
+		<script src = "gauge.min.js.gz"></script>
 		<link rel="stylesheet" type="text/css" href="style.css">
 		<link rel="stylesheet" type="text/css" href="upd_style.css">
 		<script src="Chart.min.js.gz"></script>
 		<script src="utils.js"></script>
-		<script src = "gauge.min.js.gz"></script>
 		
 		<style>
 			* {box-sizing: border-box}
@@ -69,6 +69,7 @@
 			#butFWUpdate {width: 75px; height: 25px; border-radius: 10px;}
 
 			.slider {
+				margin-top: 20px;
 				-webkit-appearance: none;
 				width: 80%;
 				height: 15px;
@@ -85,15 +86,15 @@
 			.slider::-webkit-slider-thumb {
 				-webkit-appearance: none;
 				appearance: none;
-				width: 25px;
-				height: 25px;
+				width: 45px;
+				height: 45px;
 				border-radius: 50%;
 				background: #4CAF50;
 				cursor: pointer;
 			}
 			.slider::-moz-range-thumb {
-				width: 25px;
-				height: 25px;
+				width: 45px;
+				height: 45px;
 				border-radius: 50%;
 				background: #4CAF50;
 				cursor: pointer;
@@ -191,9 +192,9 @@
 				</tr>				
 				<tr>
 					<td>
-						<input type = "range" min="20" max="30" list="tickmarks" value="25" class="slider" id="rTemp" onchange="chSetTemp(this.value)">
+						<input type = "range" min="16" max="35" list="tickmarks" value="25" class="slider" id="rTemp" onchange="chSetTemp(this.value)">
 					</td>
-				</tr>						
+				</tr>				
 			</table>
 		</div>
 
@@ -256,11 +257,10 @@
 			var cHum;
 			var rTemp = document.getElementById("rTemp");
 
-			/*var rTempDisp = document.getElementById("rTempDisp");
-			rTempDisp.innerHTML = rTemp.value;*/
+			var tmpChBCtrl = false;
+			var tmpSetTemp = 0;
 
 			rTemp.oninput = function() {
-				// rTempDisp.innerHTML = this.value;
 				chInputTemp(this.value);
 			}
 
@@ -327,8 +327,6 @@
 			};
 			/**************************************************************************************************************************/
 			/**************************************************************************************************************************/
-
-			// var gWidth = document.body.clientWidth; 
 			var gScale = 4.5;
 			var gHeight = document.body.clientHeight / gScale;
 			var gWidth = gHeight;
@@ -343,7 +341,6 @@
 			});
 
 			function resize_info() {
-				// gWidth = document.body.clientWidth; 
 				gWidth = gHeight = document.body.clientHeight / gScale;		
 				gTemp.update({
 					width: gWidth,
@@ -390,6 +387,7 @@
 					xmlHttp.open('PUT', 'setParam?setTemp=' + val, true);
 					xmlHttp.send();
 				}
+				tmpSetTemp = val;
 			}
 
 			function chSetCtrl(val) {
@@ -397,6 +395,7 @@
 					xmlHttp.open('PUT', 'setParam?setCtrl=' + val, true);
 					xmlHttp.send();
 				}
+				tmpChBCtrl = val;
 			}
 
 			/* Выполняет запрос XML данных, далее выполняет запрос */
@@ -405,18 +404,24 @@
 				if((xmlHttp.readyState == 0) || (xmlHttp.readyState == 4)) {
 					xmlHttp.onreadystatechange = function() {
 						if((xmlHttp.readyState == 4) && (xmlHttp.status == 200)) {
-							xmlDoc = xmlHttp.responseXML;							
+							xmlDoc = xmlHttp.responseXML;		
+							var lSetTemp = xmlDoc.getElementsByTagName('x_setTemp')[0].firstChild.nodeValue;
+							var lCtrl = (xmlDoc.getElementsByTagName('x_ctrl')[0].firstChild.nodeValue == 1)?(true):(false);		
 
-							xmlmsg = xmlDoc.getElementsByTagName('x_setTemp')[0].firstChild.nodeValue;
+							if(tmpChBCtrl != lCtrl)	{
+								chSetCtrl(lCtrl);	
+								document.getElementById('ctrl').checked = lCtrl;	
+							}	
+
+							if(tmpSetTemp != lSetTemp) {
+								chSetTemp(lSetTemp);
+								document.getElementById('rTemp').value = lSetTemp;	
+							}
+			
 							if(starUpSetRange == false) {
-								document.getElementById('rTemp').value = xmlmsg;
-								/*document.getElementById('rTempDisp').innerHTML = xmlmsg;*/
-								chInputTemp(xmlmsg);
-
-								xmlmsg = xmlDoc.getElementsByTagName('x_ctrl')[0].firstChild.nodeValue;								
-								document.getElementById('ctrl').checked = (xmlmsg == "1")?(true):(false);
-
-
+								document.getElementById('rTemp').value = lSetTemp;
+								chInputTemp(lSetTemp);							
+								document.getElementById('ctrl').checked = (lCtrl == "1")?(true):(false);
 								starUpSetRange = true;
 							}
 			
