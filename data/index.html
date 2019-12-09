@@ -76,8 +76,8 @@
 				background: #d3d3d3;
 				outline: none;
 				opacity: 0.7;
-				-webkit-transition: .2s;
-				transition: opacity .2s;
+				-webkit-transition: .3s;
+				transition: opacity .3s;
 			}
 			.slider:hover {
 				opacity: 1;
@@ -182,7 +182,7 @@
 				</tr>
 				<tr>
 					<td>
-						<p>Set temperature: <span id="rTempDisp"></span></p>		
+						<!--<p>Set temperature: <span id="rTempDisp"></span></p>	-->
 						<label class="switch">
 							<input type="checkbox" id="ctrl" onchange="chSetCtrl(this.checked)">
 							<span class="range round"></span>
@@ -255,11 +255,13 @@
 			var cTemp;
 			var cHum;
 			var rTemp = document.getElementById("rTemp");
-			var rTempDisp = document.getElementById("rTempDisp");
-			rTempDisp.innerHTML = rTemp.value;
+
+			/*var rTempDisp = document.getElementById("rTempDisp");
+			rTempDisp.innerHTML = rTemp.value;*/
 
 			rTemp.oninput = function() {
-				rTempDisp.innerHTML = this.value;
+				// rTempDisp.innerHTML = this.value;
+				chInputTemp(this.value);
 			}
 
 			/****************************************************** CHART ******************************************************/
@@ -318,7 +320,7 @@
 					}*/
 				}
 			};
-			var myChart;
+			var myChart;			
 			window.onload = function() {
 				var ctx = document.getElementById('canvas').getContext('2d');
 				myChart = new Chart(ctx, config);
@@ -355,7 +357,35 @@
 
 			var starUpSetRange = false;
 
+			function chInputTemp(val) {
+				gTemp.update({
+					highlights: [
+						{
+							"from": 10,
+							"to": 20,
+							"color": "rgba(0, 191, 255,  255)"
+						},
+						{
+							"from": 20,
+							"to": 30,
+							"color": "rgba(124, 252, 0,  255)"
+						},
+						{
+							"from": 30,
+							"to": 40,
+							"color": "rgba(255, 160, 122,  255)"
+						},
+						{
+							"from": val - 1,
+							"to": val,
+							"color": "rgba(255, 255, 20,  25)"
+						}
+					]
+				});
+			}
+
 			function chSetTemp(val) {
+				chInputTemp(val);
 				if((xmlHttp.readyState == 0) || (xmlHttp.readyState == 4)) {
 					xmlHttp.open('PUT', 'setParam?setTemp=' + val, true);
 					xmlHttp.send();
@@ -380,7 +410,8 @@
 							xmlmsg = xmlDoc.getElementsByTagName('x_setTemp')[0].firstChild.nodeValue;
 							if(starUpSetRange == false) {
 								document.getElementById('rTemp').value = xmlmsg;
-								document.getElementById('rTempDisp').innerHTML = xmlmsg;
+								/*document.getElementById('rTempDisp').innerHTML = xmlmsg;*/
+								chInputTemp(xmlmsg);
 
 								xmlmsg = xmlDoc.getElementsByTagName('x_ctrl')[0].firstChild.nodeValue;								
 								document.getElementById('ctrl').checked = (xmlmsg == "1")?(true):(false);
@@ -443,7 +474,7 @@
 							"from": 30,
 							"to": 40,
 							"color": "rgba(255, 160, 122,  255)"
-						}
+						},
 					],
 					needleType: "arrow",
 					needleWidth: 2,
@@ -476,7 +507,7 @@
 				minorTicks: 5,
 				colorPlate: "rgba(100, 100, 100, 10)",
 				highlights: [
-					{
+				{
 						"from": 0,
 						"to": 30,
 						"color": "rgba(240, 230, 0,  255)"
