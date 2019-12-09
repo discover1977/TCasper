@@ -37,6 +37,8 @@ bool readFlag = false;
 SI7021 sht;
 float temperature = 0.0;
 int humidity = 0.0;
+uint8_t  OUT1State = 0;
+uint8_t  OUT2State = 0;
 
 static os_timer_t timer;
 void h_timer(void *arg) {
@@ -99,6 +101,12 @@ void build_XML() {
   XML +=      "<x_ctrl>";
   XML +=        Param.Control;
   XML +=      "</x_ctrl>";
+  XML +=      "<x_out1>";
+  XML +=        OUT1State;
+  XML +=      "</x_out1>";
+  XML +=      "<x_out2>";
+  XML +=        OUT2State;
+  XML +=      "</x_out2>";  
   XML +=     "</xml>";
 
   // Serial.println(XML);
@@ -326,6 +334,8 @@ void setup() {
     /*********************** Relay configure **********************/
   pinMode(OUT1, OUTPUT);
   pinMode(OUT2, OUTPUT);
+  OUT1State = LOW;
+  OUT2State = LOW;
   /**************************************************************/
 
   sht.begin(SDA, SCL);
@@ -347,13 +357,16 @@ void loop() {
       if(Param.Control == 1) {
         if(temperature <= (float)(Param.SetTemperature - 1)) {
           digitalWrite(OUT1, HIGH);
+          OUT1State = HIGH;
         }
         if(temperature >= (float)Param.SetTemperature) {
           digitalWrite(OUT1, LOW);
+          OUT1State = LOW;
         }
       }
       else {
         digitalWrite(OUT1, LOW);
+        OUT1State = LOW;
       }
     }
     else Serial.println(F("SHT is loss"));

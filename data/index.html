@@ -89,14 +89,14 @@
 				width: 45px;
 				height: 45px;
 				border-radius: 50%;
-				background: #4CAF50;
+				background: rgb(58, 54, 94);
 				cursor: pointer;
 			}
 			.slider::-moz-range-thumb {
 				width: 45px;
 				height: 45px;
 				border-radius: 50%;
-				background: #4CAF50;
+				background: rgb(58, 54, 94);
 				cursor: pointer;
 			}
 
@@ -435,6 +435,22 @@
 							hum = xmlmsg;
 							gHum.value = hum;
 
+							xmlmsg = xmlDoc.getElementsByTagName('x_out1')[0].firstChild.nodeValue;	
+							if(xmlmsg == "1") {
+								gTemp.update(
+									{
+										colorNumbers: "#dd5555"	
+									}
+								);
+							}
+							else {
+								gTemp.update(
+									{
+										colorNumbers: "#dddddd"	
+									}
+								);
+							}
+
 							tSeries.shift();
 							hSeries.shift();
 							tSeries.push(temp);
@@ -454,7 +470,9 @@
 					gTemp = new RadialGauge({
 					renderTo: 'gTemp',
 					title: 'Temperature',
+					colorTitle: '#ddd',
 					units: "°C",
+					colorUnits: '#ddd',
 					width: gWidth,
 					height: gHeight,
 					minValue: 10,
@@ -501,7 +519,9 @@
 				gHum = new RadialGauge({
 				renderTo: 'gHum',
 				title: 'Humidity',
+				colorTitle: '#ddd',
 				units: "%",
+				colorUnits: '#ddd',
 				width: gWidth,
 				height: gHeight,
 				minValue: 0,
