@@ -17,7 +17,7 @@ const int AP_MODE_PIN = D5;
 
 #define MAX_COORDS_ARR  10
 
-const char* ap_ssid = "TCasper";
+const char* ap_ssid = "Casper";
 const char* ap_password = "Casper8266";
 
 struct Param {
@@ -29,7 +29,7 @@ struct Param {
 /* Объявление сервера, порт 80 */
 ESP8266WebServer server(80);
 ESP8266HTTPUpdateServer httpUpdater;
-FtpServer ftpSrv;   //set #define FTP_DEBUG in ESP8266FtpServer.h to see ftp verbose on serial
+FtpServer ftpSrv;
 String webSite = "";
 String XML = "";
 bool readFlag = false;
