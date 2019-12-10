@@ -3,10 +3,11 @@
 	<head>
 		<meta name='viewport' content='width=device-width, initial-scale=1', charset="utf-8">
 		<script src = "gauge.min.js.gz"></script>
-		<link rel="stylesheet" type="text/css" href="style.css">
-		<link rel="stylesheet" type="text/css" href="upd_style.css">
-		<script src="Chart.min.js.gz"></script>
-		<script src="utils.js"></script>
+		<link rel = "stylesheet" type = "text/css" href = "style.css">
+		<link rel = "stylesheet" type = "text/css" href = "upd_style.css">
+		<script src = "Chart.min.js.gz"></script>
+		<script src = "utils.js"></script>
+		<script src = "string.format-1.0.min.js"></script>
 		
 		<style>
 			* {box-sizing: border-box}
@@ -216,6 +217,8 @@
 						</td>
 					</tr>
 					<tr><td><a href='/update'><button id='butFWUpdate'>Update</button></a></td></tr>
+					<tr><td><div id = "wt">---</div></td></tr>
+					<tr><td><div id = "heap">---</div></td></tr>
 				</table>
 			</footer>
 		</div>
@@ -398,6 +401,9 @@
 				tmpChBCtrl = val;
 			}
 
+			var today = new Date;
+			today.setHours(0, 0, 0, 0);		
+
 			/* Выполняет запрос XML данных, далее выполняет запрос */
 			/* по таймауту раз в секунду */
 			function process() {
@@ -456,6 +462,11 @@
 							tSeries.push(temp);
 							hSeries.push(hum);
 							myChart.update();
+
+							xmlmsg = xmlDoc.getElementsByTagName('x_wt')[0].firstChild.nodeValue;	
+							document.getElementById('wt').innerHTML = xmlmsg;
+							xmlmsg = xmlDoc.getElementsByTagName('x_heap')[0].firstChild.nodeValue;	
+							document.getElementById('heap').innerHTML = xmlmsg;
 						}
 					}
 					xmlHttp.open('PUT', 'xml', true);

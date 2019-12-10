@@ -15,8 +15,6 @@ const int AP_MODE_PIN = D5;
 #define OUT1  14
 #define OUT2  12
 
-#define MAX_COORDS_ARR  10
-
 const char* ap_ssid = "Casper";
 const char* ap_password = "Casper8266";
 
@@ -25,6 +23,13 @@ struct Param {
   uint8_t SetTemperature;
   bool Control;
 } Param;
+
+struct WorkTime {
+  uint8_t second = 0;
+  uint8_t minute = 0;
+  uint8_t hour = 0;
+  uint16_t day = 0;
+} WorkTime;
 
 /* Объявление сервера, порт 80 */
 ESP8266WebServer server(80);
@@ -40,9 +45,31 @@ int humidity = 0.0;
 uint8_t  OUT1State = 0;
 uint8_t  OUT2State = 0;
 
+void upd_wt() {
+  if(++WorkTime.second == 60) {
+    WorkTime.second = 0;
+    if(++WorkTime.minute == 60) {
+      WorkTime.minute = 0;
+      if(++WorkTime.hour == 24) {
+        WorkTime.hour = 0;
+        ++WorkTime.day;
+      }
+    }
+  }
+}
+
+uint32_t tws = 0;
 static os_timer_t timer;
 void h_timer(void *arg) {
   readFlag = true;
+  upd_wt();
+}   
+
+void getWTStr(char *str) {
+  sprintf(str, "%d.%02d:%02d:%02d", WorkTime.day,
+                                    WorkTime.hour,
+                                    WorkTime.minute,
+                                    WorkTime.second);
 }
 
 void led_ctrl(uint8_t lev) {
@@ -86,6 +113,7 @@ void save_param() {
 /* Функция формирования строки XML данных */
 void build_XML() {
   char txt[16];
+  // uint32_t tws = ESP.getCycleCount() / 80000000;
   XML = "<?xml version='1.0'?>";
   XML +=    "<xml>";
   XML +="     <x_temp>";
@@ -107,6 +135,13 @@ void build_XML() {
   XML +=      "<x_out2>";
   XML +=        OUT2State;
   XML +=      "</x_out2>";  
+  XML +=      "<x_heap>";
+  XML +=        ESP.getFreeHeap();
+  XML +=      "</x_heap>";  
+  getWTStr(txt);
+  XML +=      "<x_wt>";
+  XML +=        txt;
+  XML +=      "</x_wt>";    
   XML +=     "</xml>";
 
   // Serial.println(XML);
@@ -169,18 +204,14 @@ void h_Website() {
 }
 
 /* Обработчик/handler запроса XML данных */
-/* Отправляет клиенту(браузеру) XML данные */
 void h_XML() {
   build_XML();
   server.send(200, "text/xml", XML);
 }
 
 /* Обработчик/handler /clickBut */
-/* Отправляет клиенту(браузеру) XML данные */
 void h_clickBut() { 
   Serial.print(F("HTML button: "));
-  //if(server.arg("val") == "AddPoint") {
-  //}
   Serial.println(server.arg("val"));
   build_XML();
   server.send(200, "text/xml", XML);
@@ -219,7 +250,7 @@ void h_wifi_param() {
   Serial.print("Wi-Fi SSID: "); Serial.println(ssid);
   Serial.print("Wi-Fi pass: "); Serial.println(pass);
   WiFi.begin(ssid, pass);
-  server.send(200, "text/html", "<br><br><br><br><br>Module will be rebooting...");
+  server.send(200, "text/html", "Wi-Fi setting is updated, module will be rebooting...");
   delay(500);
   SPIFFS.end();
   Serial.println("Resetting ESP");
