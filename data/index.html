@@ -4,10 +4,8 @@
 		<meta name='viewport' content='width=device-width, initial-scale=1', charset="utf-8">
 		<script src = "gauge.min.js.gz"></script>
 		<link rel = "stylesheet" type = "text/css" href = "style.css">
-		<link rel = "stylesheet" type = "text/css" href = "upd_style.css">
 		<script src = "Chart.min.js.gz"></script>
 		<script src = "utils.js"></script>
-		<script src = "string.format-1.0.min.js"></script>
 		
 		<style>
 			* {box-sizing: border-box}
@@ -272,10 +270,10 @@
 			var lName  = [];
 			var tSeries = [];
 			var hSeries = [];
-			for(var i = 0; i < 60; i++) {
-				lName.push(i);
-				tSeries.push(0);
-				hSeries.push(0);
+			for(var i = 0; i < 24; i++) {
+				// lName.push("");
+				// tSeries.push(0);
+				// hSeries.push(0);
 			}
 			var config = {
 				type: 'line',
@@ -308,26 +306,28 @@
 					title: {
 						display: false,
 						text: 'Gavrilov Ivan'
-					}/*,
+					},
+					gridLines: {
+						display: false
+					},				
 					scales: {
-						y: {
-							min: 0,
-							max: 100
-						},
 						yAxes: [{
 							ticks: {
-								suggestedMin: 0,
-								suggestedMax: 100
+								min: 10
 							}
 						}]
-					}*/
+					}
 				}
 			};
 			var myChart;			
-			window.onload = function() {
+			/*window.onload = function() {
 				var ctx = document.getElementById('canvas').getContext('2d');
 				myChart = new Chart(ctx, config);
-			};
+			};*/
+			function init_chart() {
+				var ctx = document.getElementById('canvas').getContext('2d');
+				myChart = new Chart(ctx, config);
+			}
 			/**************************************************************************************************************************/
 			/**************************************************************************************************************************/
 			var gScale = 4.5;
@@ -357,7 +357,7 @@
 
 			var starUpSetRange = false;
 
-			function chInputTemp(val) {
+			function chInputTemp(val) {				
 				gTemp.update({
 					highlights: [
 						{
@@ -385,24 +385,23 @@
 			}
 
 			function chSetTemp(val) {
+				tmpSetTemp = val;
 				chInputTemp(val);
 				if((xmlHttp.readyState == 0) || (xmlHttp.readyState == 4)) {
 					xmlHttp.open('PUT', 'setParam?setTemp=' + val, true);
 					xmlHttp.send();
-				}
-				tmpSetTemp = val;
+				}				
 			}
 
 			function chSetCtrl(val) {
+				tmpChBCtrl = val;
 				if((xmlHttp.readyState == 0) || (xmlHttp.readyState == 4)) {
 					xmlHttp.open('PUT', 'setParam?setCtrl=' + val, true);
 					xmlHttp.send();
-				}
-				tmpChBCtrl = val;
+				}				
 			}
 
-			var today = new Date;
-			today.setHours(0, 0, 0, 0);		
+			var secondCnt = 0;	
 
 			/* Выполняет запрос XML данных, далее выполняет запрос */
 			/* по таймауту раз в секунду */
@@ -429,6 +428,16 @@
 								chInputTemp(lSetTemp);							
 								document.getElementById('ctrl').checked = (lCtrl == "1")?(true):(false);
 								starUpSetRange = true;
+
+								for(var i = 0; i < 24; i++) {
+									xmlmsg = xmlDoc.getElementsByTagName('x_btemp')[i].firstChild.nodeValue;
+									tSeries.push(xmlmsg);									
+									xmlmsg = xmlDoc.getElementsByTagName('x_bhum')[i].firstChild.nodeValue;
+									hSeries.push(xmlmsg);
+									xmlmsg = xmlDoc.getElementsByTagName('x_bhour')[i].firstChild.nodeValue;
+									lName.push(xmlmsg);									
+								}
+								init_chart();
 							}
 			
 							xmlmsg = xmlDoc.getElementsByTagName('x_temp')[0].firstChild.nodeValue;	
@@ -457,11 +466,19 @@
 								);
 							}
 
-							tSeries.shift();
-							hSeries.shift();
-							tSeries.push(temp);
-							hSeries.push(hum);
-							myChart.update();
+							if(++secondCnt == 3600) {
+								secondCnt = 0;
+								tSeries.shift();
+								hSeries.shift();
+								tSeries.push(temp);
+								hSeries.push(hum);
+								for(var i = 0; i < 24; i++) {
+									xmlmsg = xmlDoc.getElementsByTagName('x_bhour')[i].firstChild.nodeValue;
+									lName.shift();
+									lName.push(xmlmsg);
+								}	
+								myChart.update();
+							}
 
 							xmlmsg = xmlDoc.getElementsByTagName('x_wt')[0].firstChild.nodeValue;	
 							document.getElementById('wt').innerHTML = xmlmsg;

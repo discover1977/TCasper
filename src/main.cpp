@@ -18,11 +18,21 @@ const int AP_MODE_PIN = D5;
 const char* ap_ssid = "Casper";
 const char* ap_password = "Casper8266";
 
+#define PARAM_ADDR              (0)
+#define BUFFER_SIZE 24
+
 struct Param {
-  uint32_t ChipID;
-  uint8_t SetTemperature;
-  bool Control;
-} Param;
+  uint32_t ChipID;         
+  uint8_t SetTemperature;       
+  bool Control;                
+} Param;                       
+
+struct BufferData {
+  uint16_t bIndex = 0; 
+  float temperature[BUFFER_SIZE]; 
+  uint8_t humidity[BUFFER_SIZE]; 
+  uint8_t hour[BUFFER_SIZE];      
+} BufferData;                    
 
 struct WorkTime {
   uint8_t second = 0;
@@ -44,6 +54,56 @@ float temperature = 0.0;
 int humidity = 0.0;
 uint8_t  OUT1State = 0;
 uint8_t  OUT2State = 0;
+
+void led_ctrl(uint8_t lev) {
+  digitalWrite(2, !lev);
+}
+
+void push_bufferData(float temp, uint8_t hum, uint8_t hour) {
+  led_ctrl(HIGH);
+  int lIndex = BufferData.bIndex;
+  BufferData.temperature[lIndex] = temp;
+  BufferData.humidity[lIndex] = hum;
+  BufferData.hour[lIndex] = hour;    
+  if(++BufferData.bIndex == BUFFER_SIZE) {
+      BufferData.bIndex = 0;
+  }
+  led_ctrl(LOW);
+}
+
+/*void get_bufferData() {
+    int eSize = sizeof(EbufferData);
+    EEPROM.begin(eSize);
+    EEPROM.get(EBUFFER_DATA_ADDR, EbufferData);
+    //EEPROM.end();
+    eSize = sizeof(EbufferParam);
+    EEPROM.begin(eSize);
+    EEPROM.get(EBUFFER_PARAM_ADDR, EbufferParam);
+    //EEPROM.end();
+}*/
+
+uint8_t get_bufferIndex(uint8_t addr) {
+    int laddr = 0;
+    if((addr + BufferData.bIndex) < BUFFER_SIZE) {
+        laddr = addr + BufferData.bIndex;
+    }
+    else {
+        laddr = addr - (BUFFER_SIZE - BufferData.bIndex);
+    }
+    return laddr;
+}
+
+float get_bufferTemp(uint8_t addr) {
+  return BufferData.temperature[get_bufferIndex(addr)];
+}
+
+uint8_t get_bufferHum(uint8_t addr) {
+  return BufferData.humidity[get_bufferIndex(addr)];
+}
+
+uint8_t get_bufferHour(uint8_t addr) {
+  return BufferData.hour[get_bufferIndex(addr)];
+}
 
 void upd_wt() {
   if(++WorkTime.second == 60) {
@@ -72,10 +132,6 @@ void getWTStr(char *str) {
                                     WorkTime.second);
 }
 
-void led_ctrl(uint8_t lev) {
-  digitalWrite(2, !lev);
-}
-
 void sblink(uint8_t rep, uint16_t del) {
   for(int i = 0; i < rep; i++) {
     led_ctrl(HIGH);
@@ -98,16 +154,26 @@ float constrF(float val, float min, float max) {
 }
 
 void save_param() {
-  Serial.println("EEPROM save param");
-  int pSize = sizeof(Param);
-  Serial.print("EEPROM data size: "); Serial.println(pSize);
-  EEPROM.begin(pSize);
-  Serial.print(F("Chip ID: "));           Serial.println(Param.ChipID);
-  Serial.print(F("Set temperature: "));   Serial.println(Param.SetTemperature);
-  Serial.print(F("Control: "));           Serial.println(Param.Control);
-  EEPROM.put(0, Param);
+  led_ctrl(HIGH);
+  int eSize = sizeof(Param);
+  EEPROM.begin(eSize);
+  EEPROM.put(PARAM_ADDR, Param);
   EEPROM.end();
-  Serial.print("EEPROM save param completed");
+  led_ctrl(LOW);
+}
+
+void eeprom_init() {
+  Serial.println("EEPROM initialization");
+
+  int eSize = sizeof(Param);
+  EEPROM.begin(eSize);
+  Param.ChipID = ESP.getChipId();
+  Param.SetTemperature = 25;
+  Param.Control = true;
+  EEPROM.put(PARAM_ADDR, Param);
+  EEPROM.end();
+  Serial.println("EEPROM initialization completed");
+  Serial.println("");
 }
 
 /* Функция формирования строки XML данных */
@@ -142,6 +208,17 @@ void build_XML() {
   XML +=      "<x_wt>";
   XML +=        txt;
   XML +=      "</x_wt>";    
+  for(int i = 0; i < BUFFER_SIZE; i++) {
+    XML +=      "<x_btemp>";
+    XML +=        get_bufferTemp(i);
+    XML +=      "</x_btemp>"; 
+    XML +=      "<x_bhum>";
+    XML +=        get_bufferHum(i);
+    XML +=      "</x_bhum>"; 
+    XML +=      "<x_bhour>";
+    XML +=        get_bufferHour(i);
+    XML +=      "</x_bhour>"; 
+  }
   XML +=     "</xml>";
 
   // Serial.println(XML);
@@ -257,29 +334,25 @@ void h_wifi_param() {
   ESP.restart();
 }
 
-void eeprom_init() {
-  Serial.println("EEPROM initialization");
-  int pSize = sizeof(Param);
-  Serial.print("EEPROM data size: "); Serial.println(pSize);
-  EEPROM.begin(pSize);
-  Param.ChipID = ESP.getChipId();
-  Param.SetTemperature = 27;
-  Param.Control = true;
-  EEPROM.put(0, Param);
-  EEPROM.end();
-  Serial.print("EEPROM initialization completed");
-}
-
 void setup() {
   Serial.begin(115200);
   uint16_t WiFiConnTimeOut = 50;
 
   Serial.println("");
-  int pSize = sizeof(Param);
-  EEPROM.begin(pSize);
-  EEPROM.get(0, Param);
+  int eSize = sizeof(Param);
+  EEPROM.begin(eSize);
+  EEPROM.get(PARAM_ADDR, Param);
   if(Param.ChipID != ESP.getChipId()) {
     eeprom_init();
+  }
+
+  /* Buffer init */
+  BufferData.bIndex = 0;
+  float t = 20.0;
+  uint8_t h = 30;
+  uint8_t hr = 0;
+  for(int i = 0; i < (BUFFER_SIZE); i++) {    
+    push_bufferData(t, h, hr);
   }
 
   pinMode(AP_MODE_PIN, INPUT_PULLUP);
@@ -370,6 +443,23 @@ void setup() {
   /**************************************************************/
 
   sht.begin(SDA, SCL);
+
+  Serial.print(F("Param      size: ")); Serial.println(sizeof(Param));
+  Serial.print(F("BufferData size: ")); Serial.println(sizeof(BufferData)); 
+  Serial.println("");
+
+  Serial.print(F("ChipID: ")); Serial.println(Param.ChipID);
+  Serial.print(F("Control: ")); Serial.println(Param.Control);
+  Serial.print(F("Set temperature: ")); Serial.println(Param.SetTemperature);
+  Serial.println("");
+
+  Serial.println(F("EbufferData: "));
+  for(int i = 0; i < BUFFER_SIZE; i++) {
+    Serial.print(F("Temp: ")); Serial.print(get_bufferTemp(i));
+    Serial.print(F(", Hum: ")); Serial.print(get_bufferHum(i));
+    Serial.print(F(", Hour: ")); Serial.println(get_bufferHour(i));
+  }
+  Serial.println("");
 }
 
 void loop() {
@@ -381,25 +471,25 @@ void loop() {
 
   if(readFlag) {
     readFlag = false;
-    if(sht.sensorExists()) {
-      temperature = constrF((sht.getCelsiusHundredths() / 100.0), 10.0, 40.0);
-      humidity = constr(sht.getHumidityPercent(), 0, 100);
-      build_XML();
-      if(Param.Control == 1) {
-        if(temperature <= (float)(Param.SetTemperature - 1)) {
-          digitalWrite(OUT1, HIGH);
-          OUT1State = HIGH;
-        }
-        if(temperature >= (float)Param.SetTemperature) {
-          digitalWrite(OUT1, LOW);
-          OUT1State = LOW;
-        }
+    temperature = constrF((sht.getCelsiusHundredths() / 100.0), 10.0, 40.0);
+    humidity = constr(sht.getHumidityPercent(), 0, 100);
+    if((WorkTime.minute == 0) && (WorkTime.second == 0)) {
+      push_bufferData(temperature, humidity, WorkTime.minute);
+    }    
+    build_XML();
+    if(Param.Control == 1) {
+      if(temperature <= (float)(Param.SetTemperature - 1)) {
+        digitalWrite(OUT1, HIGH);
+        OUT1State = HIGH;
       }
-      else {
+      if(temperature >= (float)Param.SetTemperature) {
         digitalWrite(OUT1, LOW);
         OUT1State = LOW;
       }
     }
-    else Serial.println(F("SHT is loss"));
+    else {
+      digitalWrite(OUT1, LOW);
+      OUT1State = LOW;
+    }
   }
 }
