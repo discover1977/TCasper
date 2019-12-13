@@ -474,7 +474,7 @@ void loop() {
     temperature = constrF((sht.getCelsiusHundredths() / 100.0), 10.0, 40.0);
     humidity = constr(sht.getHumidityPercent(), 0, 100);
     if((WorkTime.minute == 0) && (WorkTime.second == 0)) {
-      push_bufferData(temperature, humidity, WorkTime.minute);
+      push_bufferData(temperature, humidity, WorkTime.hour);
     }    
     build_XML();
     if(Param.Control == 1) {
