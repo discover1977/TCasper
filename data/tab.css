@@ -1,0 +1,58 @@
+* {box-sizing: border-box}
+
+/* Set height of body and the document to 100% */
+body, html {
+	height: 100%;
+	margin: 0;
+	font-family: Calibri;
+}
+
+/* Style tab links */
+.tablink {
+	background-color: #555;
+	color: white;
+	float: left;
+	border: none;
+	outline: none;
+	cursor: pointer;
+	padding: 16px 16px;
+	font-size: 14px;
+	width: 33.3333333333%;
+}
+
+.tablink:hover {
+	background-color: #777;
+}
+
+/* Style the tab content (and add height:100% for full page content) */
+.tabcontent {
+	color: white;
+	display: none;
+	padding: 0px;
+	height: 100%;
+}
+
+.tabcontentSch {
+	color: rgb(34, 17, 17);
+	display: none;
+	padding: 0px;
+	height: 100%;
+}
+
+#Home {background-color: rgb(240, 157, 62);}
+#Schedule{background-color: rgb(63, 114, 156);}
+#Settings{background-color: rgb(0, 117, 82);}
+
+#Mo{background-color: rgb(200, 200, 250);}
+#Tu{background-color: rgb(200, 200, 250);}
+#We{background-color: rgb(200, 200, 250);}
+#Th{background-color: rgb(200, 200, 250);}
+#Fr{background-color: rgb(200, 200, 250);}
+#Sa{background-color: rgb(200, 200, 250);}
+#Su{background-color: rgb(200, 200, 250);}
+
+.footer {
+	padding: 5px;
+	text-align: center;
+	margin-bottom: 5px;
+}

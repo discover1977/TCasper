@@ -348,11 +348,8 @@ void setup() {
 
   /* Buffer init */
   BufferData.bIndex = 0;
-  float t = 20.0;
-  uint8_t h = 30;
-  uint8_t hr = 0;
   for(int i = 0; i < (BUFFER_SIZE); i++) {    
-    push_bufferData(t, h, hr);
+    push_bufferData(1.0, 1, 0);
   }
 
   pinMode(AP_MODE_PIN, INPUT_PULLUP);

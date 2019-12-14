@@ -1,165 +1,26 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<meta name='viewport' content='width=device-width, initial-scale=1', charset="utf-8">
-		<script src = "gauge.min.js.gz"></script>
-		<link rel = "stylesheet" type = "text/css" href = "style.css">
+		<meta name = 'viewport' content='width=device-width, initial-scale=1', charset = "utf-8">
+		<link rel = "stylesheet" type = "text/css" href = "chart.css">
+		<link rel = "stylesheet" type = "text/css" href = "tab.css">
+		<link rel = "stylesheet" type = "text/css" href = "table.css">
+		<link rel = "stylesheet" type = "text/css" href = "slider.css">
+		<link rel = "stylesheet" type = "text/css" href = "switch.css">
+		<link rel = "stylesheet" type = "text/css" href = "snackbar.css">
+		<link rel = "stylesheet" type = "text/css" href = "radio.css">
+		<link rel = "stylesheet" type = "text/css" href = "ion.rangeSlider.css">
+		<script src = "jquery-3.4.1.min.js.gz"></script>
 		<script src = "Chart.min.js.gz"></script>
 		<script src = "utils.js"></script>
-		
-		<style>
-			* {box-sizing: border-box}
-
-			/* Set height of body and the document to 100% */
-			body, html {
-				height: 100%;
-				margin: 0;
-				font-family: Calibri;
-			}
-
-			/* Style tab links */
-			.tablink {
-				background-color: #555;
-				color: white;
-				float: left;
-				border: none;
-				outline: none;
-				cursor: pointer;
-				padding: 14px 16px;
-				font-size: 17px;
-				width: 33.3333333333%;
-			}
-
-			.tablink:hover {
-				background-color: #777;
-			}
-
-			/* Style the tab content (and add height:100% for full page content) */
-			.tabcontent {
-				color: white;
-				display: none;
-				padding: 0px 0px;
-				height: 100%;
-			}
-
-			#Home {background-color: orange;}
-			#Settings{background-color: green;}
-
-			.footer {
-				padding: 5px;
-				text-align: center;
-				margin-bottom: 5px;
-			}
-
-			table, th, td {
-				border: 0px solid black;
-				border-collapse: collapse;
-			}
-			th, td {
-				padding: 0px;
-			}
-			th {
-				text-align: center;
-			}
-			tr {
-				text-align: center;
-			}
-
-			#butFWUpdate {width: 75px; height: 25px; border-radius: 10px;}
-
-			.slider {
-				margin-top: 20px;
-				-webkit-appearance: none;
-				width: 80%;
-				height: 15px;
-				border-radius: 5px;
-				background: #d3d3d3;
-				outline: none;
-				opacity: 0.7;
-				-webkit-transition: .3s;
-				transition: opacity .3s;
-			}
-			.slider:hover {
-				opacity: 1;
-			}
-			.slider::-webkit-slider-thumb {
-				-webkit-appearance: none;
-				appearance: none;
-				width: 45px;
-				height: 45px;
-				border-radius: 50%;
-				background: rgb(58, 54, 94);
-				cursor: pointer;
-			}
-			.slider::-moz-range-thumb {
-				width: 45px;
-				height: 45px;
-				border-radius: 50%;
-				background: rgb(58, 54, 94);
-				cursor: pointer;
-			}
-
-			.switch {
-				position: relative;
-				display: inline-block;
-				width: 60px;
-				height: 34px;
-			}
-			.switch input {display: none;}	
-
-			.range {
-				position: absolute;
-				cursor: pointer;
-				top: 0;
-				left: 0;
-				right: 0;
-				bottom: 0;
-				background-color: #ccc;
-				-webkit-transition: .4s;
-				transition: .4s;
-			}
-
-			.range:before {
-				position: absolute;
-				content: "";
-				height: 26px;
-				width: 26px;
-				left: 4px;
-				bottom: 4px;
-				background-color: white;
-				-webkit-transition: .4s;
-				transition: .4s;
-			}
-
-			/* Rounded sliders */
-			.range.round {
-				border-radius: 34px;
-			}
-
-			.range.round:before {
-				border-radius: 50%;
-			}
-
-			input:checked + .range {
-				background-color: #2196F3;
-			}
-
-			input:focus + .range {
-				box-shadow: 0 0 1px #2196F3;
-			}
-
-			input:checked + .range:before {
-				-webkit-transform: translateX(26px);
-				-ms-transform: translateX(26px);
-				transform: translateX(26px);
-			}
-		</style>
+		<script src = "ion.rangeSlider.min.js.gz"></script>
+		<script async src = "gauge.min.js.gz" onload = "initScriptedGauges()"></script>
 	</head>
 	<body>
 		
-		<button class="tablink" onclick = "openPage('Home', this, 'orange')"  id="defaultOpen">Home</button>
-		<button class="tablink" onclick = "openPage('Schedule', this, 'blue')">Schedule</button>
-		<button class="tablink" onclick = "openPage('Settings', this, 'green')">Settings</button>
+		<button class="tablink" onclick = "openPage('Home', this, 'rgb(240, 157, 62)')"  id = "defaultOpen">ДОМ</button>
+		<button class="tablink" onclick = "openPage('Schedule', this, 'rgb(63, 114, 156)')">РАСПИСАНИЕ</button>
+		<button class="tablink" onclick = "openPage('Settings', this, 'rgb(0, 117, 82)')">НАСТРОЙКИ</button>
 
 		<div id="Home" class="tabcontent">
 			<table style='width:100%'>
@@ -199,35 +60,64 @@
 			</table>
 		</div>
 
-		<div id = "Schedule" class = "tabcontent">
-			<!--<img src="\image.png" alt="Image from ESP8266" width="128" height="128">-->
-			<footer>
-
-			</footer>
+		<div id = "Schedule" class="tabcontent">
+			<div class="form_radio_group">
+				<div class="form_radio_group-item">
+					<input id="mo" type="radio" name="radio" value="mo" checked>
+					<label for="mo">ПН</label>
+				</div>
+				<div class="form_radio_group-item">
+					<input id="tu" type="radio" name="radio" value="tu">
+					<label for="tu">ВТ</label>
+				</div>
+				<div class="form_radio_group-item">
+					<input id="we" type="radio" name="radio" value="we">
+					<label for="we">СР</label>
+				</div>
+				<div class="form_radio_group-item">
+					<input id="th" type="radio" name="radio" value="th">
+					<label for="th">ЧТ</label>
+				</div>
+				<div class="form_radio_group-item">
+					<input id="fr" type="radio" name="radio" value="fr">
+					<label for="fr">ПТ</label>
+				</div>
+				<div class="form_radio_group-item">
+					<input id="sa" type="radio" name="radio" value="sa">
+					<label for="sa">СБ</label>
+				</div>
+				<div class="form_radio_group-item">
+					<input id="su" type="radio" name="radio" value="su">
+					<label for="su">ВС</label>
+				</div>
+			</div>
+		
+			<input id="rsz1" type="text" name="" value="" class="js-range-slider" tabindex="-1" readonly="">
+			<input id="rsz2" type="text" name="" value="" class="js-range-slider" tabindex="-1" readonly="">
+			<input id="rsz3" type="text" name="" value="" class="js-range-slider" tabindex="-1" readonly="">
+			<input id="rsz4" type="text" name="" value="" class="js-range-slider" tabindex="-1" readonly="">
 		</div>
 
 		<div id = "Settings" class = "tabcontent">
 			<!--<img src="\image.png" alt="Image from ESP8266" width="128" height="128">-->
-			<footer>
-				<table style='width:100%'>
-					<tr>
-						<td>
-							<br>
-							<form action="/wifi_param"  method="post">
-								SSID:<br>
-								<input type="text" name="SSID" value=""><br>
-								Password:<br>
-								<input type="password" name="stapass"><br><br>
-								<input type="submit" value="Submit">
-							</form>
-							<br>
-						</td>
-					</tr>
-					<tr><td><a href='/update'><button id='butFWUpdate'>Update</button></a></td></tr>
-					<tr><td><div id = "wt">---</div></td></tr>
-					<tr><td><div id = "heap">---</div></td></tr>
-				</table>
-			</footer>
+			<table style='width:100%'>
+				<tr>
+					<td>
+						<br>
+						<form action="/wifi_param"  method="post">
+							SSID:<br>
+							<input type="text" name="SSID" value=""><br>
+							Password:<br>
+							<input type="password" name="stapass"><br><br>
+							<input type="submit" value="Submit">
+						</form>
+						<br>
+					</td>
+				</tr>
+				<tr><td><a href='/update'><button id='butFWUpdate'>Update</button></a></td></tr>
+				<tr><td><div id = "wt">---</div></td></tr>
+				<tr><td><div id = "heap">---</div></td></tr>
+			</table>
 		</div>
 
 		<script>
@@ -256,7 +146,6 @@
 				document.getElementById(pageName).style.display = "block";
 				elmnt.style.backgroundColor = color;
 			}
-			// Get the element with id="defaultOpen" and click on it
 			document.getElementById("defaultOpen").click();
 
 			var temp = 0.0;
@@ -345,7 +234,7 @@
 			var scale = 0.7;
 
 			document.addEventListener("DOMContentLoaded", function(event) {
-				initScriptedGauges();
+				// initScriptedGauges();
 				window.onresize = function() {
 					resize_info();
 				};
@@ -393,24 +282,40 @@
 				});
 			}
 
+			var lShow = false;
 			function chSetTemp(val) {
 				tmpSetTemp = val;
 				chInputTemp(val);
 				if((xmlHttp.readyState == 0) || (xmlHttp.readyState == 4)) {
 					xmlHttp.open('PUT', 'setParam?setTemp=' + val, true);
 					xmlHttp.send();
-				}				
+				}	
+				if(!lShow) lShow = true;
+				else {
+					var str = "Установленная температура: ";
+					str += val;
+					str += "°C"
+					snackbar(str);
+				}		
 			}
 
+			olCtrlState = false;
 			function chSetCtrl(val) {
 				tmpChBCtrl = val;
 				if((xmlHttp.readyState == 0) || (xmlHttp.readyState == 4)) {
 					xmlHttp.open('PUT', 'setParam?setCtrl=' + val, true);
 					xmlHttp.send();
-				}				
+				}		
+				if(olCtrlState != val) {
+					var str = "Управление: ";
+					str += ((!olCtrlState)?("ВКЛ"):("ВЫКЛ"));
+					olCtrlState = val;
+					snackbar(str);
+				}		
 			}
 
 			var secondCnt = 0;	
+			var odlOutState1 = 0;
 
 			/* Выполняет запрос XML данных, далее выполняет запрос */
 			/* по таймауту раз в секунду */
@@ -444,7 +349,12 @@
 									xmlmsg = xmlDoc.getElementsByTagName('x_bhum')[i].firstChild.nodeValue;
 									hSeries.push(xmlmsg);
 									xmlmsg = xmlDoc.getElementsByTagName('x_bhour')[i].firstChild.nodeValue;
-									lName.push(xmlmsg);									
+									if((tSeries[i] == 1.00) && (hSeries[i] == 1) && (xmlmsg == 0)) {
+										lName.push("-");
+									}	
+									else {
+										lName.push(xmlmsg);	
+									}						
 								}
 								init_chart();
 							}
@@ -460,6 +370,13 @@
 							gHum.value = hum;
 
 							xmlmsg = xmlDoc.getElementsByTagName('x_out1')[0].firstChild.nodeValue;	
+
+							if(odlOutState1 != xmlmsg) {
+								odlOutState1 = xmlmsg;
+								var str = "Котёл: ";
+								str += ((xmlmsg == 1)?("ВКЛ"):("ВЫКЛ"));
+								snackbar(str);
+							}
 							if(xmlmsg == "1") {
 								gTemp.update(
 									{
@@ -554,53 +471,78 @@
 
 				/* Humidity gauge */
 				gHum = new RadialGauge({
-				renderTo: 'gHum',
-				title: 'Humidity',
-				colorTitle: '#ddd',
-				units: "%",
-				colorUnits: '#ddd',
-				width: gWidth,
-				height: gHeight,
-				minValue: 0,
-				maxValue: 100,
-				value: 0,
-				borders: false,
-				majorTicks: ["0", "10", "20", "30", "40", "50", "60", "70", "80", "90", "100"],
-				minorTicks: 5,
-				colorPlate: "rgba(100, 100, 100, 10)",
-				highlights: [
-				{
-						"from": 0,
-						"to": 30,
-						"color": "rgba(240, 230, 0,  255)"
-					},
-					{
-						"from": 30,
-						"to": 70,
-						"color": "rgba(124, 252, 0,  255)"
-					},
-					{
-						"from": 70,
-						"to": 100,
-						"color": "rgba(0, 191, 255,  255)"
-					}
-				],
-				needleType: "arrow",
-				needleWidth: 2,
-				needleCircleSize: 7,
-				needleCircleOuter: true,
-				needleCircleInner: false,
-				animationDuration: 500,
-				animationRule: "linear",
-				fontValueSize: 40,
-				fontValue: "verdana",
-				valueBox: true,	
-				valueInt: 3,
-				valueDec: 0,
-				fontNumbersSize: 30,
-				colorNumbers: "#dddddd"	
-			}).draw();		
-			}								
+					renderTo: 'gHum',
+					title: 'Humidity',
+					colorTitle: '#ddd',
+					units: "%",
+					colorUnits: '#ddd',
+					width: gWidth,
+					height: gHeight,
+					minValue: 0,
+					maxValue: 100,
+					value: 0,
+					borders: false,
+					majorTicks: ["0", "10", "20", "30", "40", "50", "60", "70", "80", "90", "100"],
+					minorTicks: 5,
+					colorPlate: "rgba(100, 100, 100, 10)",
+					highlights: [
+						{
+							"from": 0,
+							"to": 30,
+							"color": "rgba(240, 230, 0,  255)"
+						},
+						{
+							"from": 30,
+							"to": 70,
+							"color": "rgba(124, 252, 0,  255)"
+						},
+						{
+							"from": 70,
+							"to": 100,
+							"color": "rgba(0, 191, 255,  255)"
+						}],
+					needleType: "arrow",
+					needleWidth: 2,
+					needleCircleSize: 7,
+					needleCircleOuter: true,
+					needleCircleInner: false,
+					animationDuration: 500,
+					animationRule: "linear",
+					fontValueSize: 40,
+					fontValue: "verdana",
+					valueBox: true,	
+					valueInt: 3,
+					valueDec: 0,
+					fontNumbersSize: 30,
+					colorNumbers: "#dddddd"	
+				}).draw();		
+			}	
+			function snackbar(val) {
+				var x = document.getElementById("snackbar");
+				x.innerHTML = val
+				x.className = "show";
+				setTimeout(function(){ x.className = x.className.replace("show", ""); }, 3000);
+			}	
+
+			var rsparam = {
+				type: "double",
+				grid: true,
+				grid_snap: true,
+				grid_margin: true,
+				min: 0,
+				max: 23,
+				from: 0,
+				to: 23,
+				postfix: "H",
+				skin: "big"
+			};
+			/*********** Range sliders ************/		
+			$("#rsz1").ionRangeSlider(rsparam);
+			$("#rsz2").ionRangeSlider(rsparam);
+			$("#rsz3").ionRangeSlider(rsparam);
+			$("#rsz4").ionRangeSlider(rsparam);
+			/**************************************/				
 		</script>
+		<div id="snackbar">---</div>
 	</body>
 </html> 
