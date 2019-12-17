@@ -23,20 +23,19 @@
 		<button class="tablink" onclick = "openPage('Settings', this, 'rgb(0, 117, 82)')">НАСТРОЙКИ</button>
 
 		<div id="Home" class="tabcontent">
-			<table style='width:100%'>
+			<table style='width: 100%'>
 				<tr>
 					<td>
-						<canvas id='gTemp'></canvas>
+						<canvas id='gTemp' style='margin-top: 20px'></canvas>
 					</td>			
 					<td>
-						<canvas id='gHum'></canvas>						
+						<canvas id='gHum' style='margin-top: 20px'></canvas>						
 					</td>
 				</tr>							
 			</table>
 			<table style='width:100%'>	
 				<tr>
 					<td>
-						<!--<div style="width: 50%;"><canvas id = "canvas"></canvas></div>-->
 						<div class="content">
 							<div class = "wrapper"><canvas id = "canvas"></canvas></div>
 						</div>
@@ -44,13 +43,20 @@
 				</tr>
 				<tr>
 					<td>
-						<!--<p>Set temperature: <span id="rTempDisp"></span></p>	-->
 						<label class="switch">
 							<input type="checkbox" id="ctrl" onchange="chSetCtrl(this.checked)">
 							<span class="range round"></span>
 						</label>				
 					</td>
-				</tr>				
+				</tr>	
+				<tr>
+					<td>
+						<label class="switch">
+							<input type="checkbox" id="forceCtrl" onchange="chSetForceCtrl(this.checked)">
+							<span class="range round"></span>
+						</label>				
+					</td>
+				</tr>			
 				<tr>
 					<td>
 						<input type = "range" min = "16" max = "35" list = "tickmarks" value = "25" class = "slider"
@@ -63,39 +69,47 @@
 		<div id = "Schedule" class="tabcontent">
 			<div class="form_radio_group">
 				<div class="form_radio_group-item">
-					<input id="mo" type="radio" name="radio" value="mo" checked>
+					<input id="mo" type="radio" name="radio" value="1" onchange = "chDayOfWeek(this.value)" checked>
 					<label for="mo">ПН</label>
 				</div>
 				<div class="form_radio_group-item">
-					<input id="tu" type="radio" name="radio" value="tu">
+					<input id="tu" type="radio" name="radio" value="2" onchange = "chDayOfWeek(this.value)">
 					<label for="tu">ВТ</label>
 				</div>
 				<div class="form_radio_group-item">
-					<input id="we" type="radio" name="radio" value="we">
+					<input id="we" type="radio" name="radio" value="3" onchange = "chDayOfWeek(this.value)">
 					<label for="we">СР</label>
 				</div>
 				<div class="form_radio_group-item">
-					<input id="th" type="radio" name="radio" value="th">
+					<input id="th" type="radio" name="radio" value="4" onchange = "chDayOfWeek(this.value)">
 					<label for="th">ЧТ</label>
 				</div>
 				<div class="form_radio_group-item">
-					<input id="fr" type="radio" name="radio" value="fr">
+					<input id="fr" type="radio" name="radio" value="5" onchange = "chDayOfWeek(this.value)">
 					<label for="fr">ПТ</label>
 				</div>
 				<div class="form_radio_group-item">
-					<input id="sa" type="radio" name="radio" value="sa">
+					<input id="sa" type="radio" name="radio" value="6" onchange = "chDayOfWeek(this.value)">
 					<label for="sa">СБ</label>
 				</div>
 				<div class="form_radio_group-item">
-					<input id="su" type="radio" name="radio" value="su">
+					<input id="su" type="radio" name="radio" value="7" onchange = "chDayOfWeek(this.value)">
 					<label for="su">ВС</label>
 				</div>
 			</div>
-		
-			<input id="rsz1" type="text" name="" value="" class="js-range-slider" tabindex="-1" readonly="">
-			<input id="rsz2" type="text" name="" value="" class="js-range-slider" tabindex="-1" readonly="">
-			<input id="rsz3" type="text" name="" value="" class="js-range-slider" tabindex="-1" readonly="">
-			<input id="rsz4" type="text" name="" value="" class="js-range-slider" tabindex="-1" readonly="">
+
+			<div class="range-slider">
+				<input type="text" class="js-range-slider-1" value="1/>
+			</div>
+			<div class="range-slider">
+				<input type="text" class="js-range-slider-2" value="2"/>
+			</div>
+			<div class="range-slider">
+				<input type="text" class="js-range-slider-3" value="3/>
+			</div>
+			<div class="range-slider">
+				<input type="text" class="js-range-slider-4" value="4"/>
+			</div>
 		</div>
 
 		<div id = "Settings" class = "tabcontent">
@@ -117,6 +131,7 @@
 				<tr><td><a href='/update'><button id='butFWUpdate'>Update</button></a></td></tr>
 				<tr><td><div id = "wt">---</div></td></tr>
 				<tr><td><div id = "heap">---</div></td></tr>
+				<tr><td><button id='butFactoryDef' value ='' type='submit' onclick='factoryDef()'>Заводские настроки</button></td></tr>
 			</table>
 		</div>
 
@@ -148,6 +163,11 @@
 			}
 			document.getElementById("defaultOpen").click();
 
+			var scht = [];
+			var dayOfWeek = 1;
+			var dayOfWeekIsUpd = false;
+			for(var i = 0; i < 56; i++) scht.push(0);
+
 			var temp = 0.0;
 			var hum = 0;
 			var gTemp;
@@ -157,6 +177,7 @@
 			var rTemp = document.getElementById("rTemp");
 
 			var tmpChBCtrl = false;
+			var tmpChBForceCtrl = false;
 			var tmpSetTemp = 0;
 
 			rTemp.oninput = function() {
@@ -165,14 +186,10 @@
 
 			/****************************************************** CHART ******************************************************/
 			/*******************************************************************************************************************/
-			var lName  = [];
+			var lName = [];
 			var tSeries = [];
 			var hSeries = [];
-			for(var i = 0; i < 24; i++) {
-				// lName.push("");
-				// tSeries.push(0);
-				// hSeries.push(0);
-			}
+
 			var config = {
 				type: 'line',
 				data: {
@@ -218,10 +235,7 @@
 				}
 			};
 			var myChart;			
-			/*window.onload = function() {
-				var ctx = document.getElementById('canvas').getContext('2d');
-				myChart = new Chart(ctx, config);
-			};*/
+
 			function init_chart() {
 				var ctx = document.getElementById('canvas').getContext('2d');
 				myChart = new Chart(ctx, config);
@@ -234,7 +248,6 @@
 			var scale = 0.7;
 
 			document.addEventListener("DOMContentLoaded", function(event) {
-				// initScriptedGauges();
 				window.onresize = function() {
 					resize_info();
 				};
@@ -299,19 +312,41 @@
 				}		
 			}
 
-			olCtrlState = false;
+			var oldCtrlState = false;
 			function chSetCtrl(val) {
 				tmpChBCtrl = val;
 				if((xmlHttp.readyState == 0) || (xmlHttp.readyState == 4)) {
 					xmlHttp.open('PUT', 'setParam?setCtrl=' + val, true);
 					xmlHttp.send();
 				}		
-				if(olCtrlState != val) {
+				if(oldCtrlState != val) {
 					var str = "Управление: ";
-					str += ((!olCtrlState)?("ВКЛ"):("ВЫКЛ"));
-					olCtrlState = val;
+					str += ((!oldCtrlState)?("ВКЛ"):("ВЫКЛ"));
+					oldCtrlState = val;
 					snackbar(str);
 				}		
+			}
+
+			var oldForceCtrlState = false;
+			function chSetForceCtrl(val) {
+				tmpChBForceCtrl = val;
+				if((xmlHttp.readyState == 0) || (xmlHttp.readyState == 4)) {
+					xmlHttp.open('PUT', 'setParam?setForceCtrl=' + val, true);
+					xmlHttp.send();
+				}	
+				if(oldForceCtrlState != val) {
+					var str = "Force control: ";
+					str += ((!oldForceCtrlState)?("ВКЛ"):("ВЫКЛ"));
+					oldForceCtrlState = val;
+					snackbar(str);
+				}		
+			}
+
+			function factoryDef() {
+				if((xmlHttp.readyState == 0) || (xmlHttp.readyState == 4)) {
+					xmlHttp.open('PUT', 'factoryDef', true);
+					xmlHttp.send();
+				}
 			}
 
 			var secondCnt = 0;	
@@ -325,12 +360,18 @@
 						if((xmlHttp.readyState == 4) && (xmlHttp.status == 200)) {
 							xmlDoc = xmlHttp.responseXML;		
 							var lSetTemp = xmlDoc.getElementsByTagName('x_setTemp')[0].firstChild.nodeValue;
-							var lCtrl = (xmlDoc.getElementsByTagName('x_ctrl')[0].firstChild.nodeValue == 1)?(true):(false);		
+							var lCtrl = (xmlDoc.getElementsByTagName('x_ctrl')[0].firstChild.nodeValue == 1)?(true):(false);	
+							var lForceCtrl = (xmlDoc.getElementsByTagName('x_forceCtrl')[0].firstChild.nodeValue == 1)?(true):(false);	
 
 							if(tmpChBCtrl != lCtrl)	{
 								chSetCtrl(lCtrl);	
 								document.getElementById('ctrl').checked = lCtrl;	
 							}	
+
+							if(tmpChBForceCtrl != lForceCtrl)	{
+								chSetForceCtrl(lForceCtrl);	
+								document.getElementById('forceCtrl').checked = lForceCtrl;	
+							}
 
 							if(tmpSetTemp != lSetTemp) {
 								chSetTemp(lSetTemp);
@@ -357,6 +398,15 @@
 									}						
 								}
 								init_chart();
+							}
+
+							if(!dayOfWeekIsUpd) {
+								for(var schtCnt = 0; schtCnt < 56; schtCnt++) {
+									xmlmsg = xmlDoc.getElementsByTagName('x_scht')[schtCnt].firstChild.nodeValue;
+									scht[schtCnt] = xmlmsg;
+								}
+								set_schRange(dayOfWeek);
+								dayOfWeekIsUpd = true;
 							}
 			
 							xmlmsg = xmlDoc.getElementsByTagName('x_temp')[0].firstChild.nodeValue;	
@@ -418,6 +468,43 @@
 				setTimeout('process()', 1000);	// таймаут запроса XML
 			}	
 
+			function setZoneRange(zone, from, to) {
+				snackbar("Zone: " + zone + ", From: " + from + ", To: " + to);				
+				if((xmlHttp.readyState == 0) || (xmlHttp.readyState == 4)) {
+					xmlHttp.open('PUT', 'zoneParam?dow=' + dayOfWeek +
+												 '&zone=' + zone +
+												 '&from=' + from +
+												 '&to=' + to, true);
+					xmlHttp.send();
+					dayOfWeekIsUpd = false;
+				}
+			}
+
+			function set_schRange(dw) {
+				offset = (dw - 1) * 8;
+				range_instance_1.update({
+					from: scht[offset + 0 + 0 + 0],
+					to: scht[offset + 0 + 0 + 1]
+				});
+				range_instance_2.update({
+					from: scht[offset + 1 + 1 + 0],
+					to: scht[offset + 1 + 1 + 1]
+				});
+				range_instance_3.update({				
+					from: scht[offset + 2 + 2 + 0],
+					to: scht[offset + 2 + 2 + 1]
+				});
+				range_instance_4.update({
+					from: scht[offset + 3 + 3 + 0],
+					to: scht[offset + 3 + 3 + 1]
+				});
+			}
+
+			function chDayOfWeek(val) {
+				dayOfWeek = val;
+				set_schRange(val);
+			}
+
 			function initScriptedGauges() {
 					gWidth = gHeight;
 					/* Temperature gauge */
@@ -440,17 +527,17 @@
 						{
 							"from": 10,
 							"to": 20,
-							"color": "rgba(0, 191, 255,  255)"
+							"color": "rgba(0, 191, 255, 255)"
 						},
 						{
 							"from": 20,
 							"to": 30,
-							"color": "rgba(124, 252, 0,  255)"
+							"color": "rgba(124, 252, 0, 255)"
 						},
 						{
 							"from": 30,
 							"to": 40,
-							"color": "rgba(255, 160, 122,  255)"
+							"color": "rgba(255, 160, 122, 255)"
 						},
 					],
 					needleType: "arrow",
@@ -517,6 +604,7 @@
 					colorNumbers: "#dddddd"	
 				}).draw();		
 			}	
+
 			function snackbar(val) {
 				var x = document.getElementById("snackbar");
 				x.innerHTML = val
@@ -533,14 +621,56 @@
 				max: 23,
 				from: 0,
 				to: 23,
-				postfix: "H",
+				postfix: "Ч",
 				skin: "big"
 			};
 			/*********** Range sliders ************/		
-			$("#rsz1").ionRangeSlider(rsparam);
-			$("#rsz2").ionRangeSlider(rsparam);
-			$("#rsz3").ionRangeSlider(rsparam);
-			$("#rsz4").ionRangeSlider(rsparam);
+
+			var $range1 = $(".js-range-slider-1"),
+				$range2 = $(".js-range-slider-2"),
+				$range3 = $(".js-range-slider-3"),
+				$range4 = $(".js-range-slider-4"),
+				range_instance_1,
+				range_instance_2,
+				range_instance_3,
+				range_instance_4;
+
+			$range1.ionRangeSlider(rsparam);
+			range_instance_1 = $range1.data("ionRangeSlider");
+
+			$range2.ionRangeSlider(rsparam);
+			range_instance_2 = $range2.data("ionRangeSlider");
+
+			$range3.ionRangeSlider(rsparam);
+			range_instance_3 = $range3.data("ionRangeSlider");
+
+			$range4.ionRangeSlider(rsparam);
+			range_instance_4 = $range4.data("ionRangeSlider");
+
+			range_instance_1.update({
+				onFinish: function (data) {
+					setZoneRange(1, data.from, data.to);
+					console.log(1, data.from, data.to);
+				}
+			});
+			range_instance_2.update({
+				onFinish: function (data) {
+					setZoneRange(2, data.from, data.to);
+					console.log(2, data.from, data.to);
+				}
+			});
+			range_instance_3.update({
+				onFinish: function (data) {
+					setZoneRange(3, data.from, data.to);
+					console.log(3, data.from, data.to);
+				}
+			});
+			range_instance_4.update({
+				onFinish: function (data) {	
+					setZoneRange(4, data.from, data.to);		
+					console.log(4, data.from, data.to);
+				}
+			});
 			/**************************************/				
 		</script>
 		<div id="snackbar">---</div>

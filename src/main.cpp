@@ -6,6 +6,8 @@
 #include <FS.h>
 #include <SI7021.h>
 #include <EEPROM.h>
+#include <Wire.h>
+#include <RtcDS3231.h>
 
 // const char* imagefile = "/image.png";
 const char* htmlfile = "/index.html";
@@ -21,10 +23,31 @@ const char* ap_password = "Casper8266";
 #define PARAM_ADDR              (0)
 #define BUFFER_SIZE 24
 
+const uint8_t defSchTimes[7][4][2] = 
+{
+  {{0, 8}, {16, 23}, {0, 0}, {0, 0}},
+  {{0, 8}, {16, 23}, {0, 0}, {0, 0}},
+  {{0, 8}, {16, 23}, {0, 0}, {0, 0}},
+  {{0, 8}, {16, 23}, {0, 0}, {0, 0}},
+  {{0, 8}, {16, 23}, {0, 0}, {0, 0}},
+  {{0, 8}, {16, 23}, {0, 0}, {0, 0}},
+  {{0, 8}, {16, 23}, {0, 0}, {0, 0}}
+};  
+
 struct Param {
   uint32_t ChipID;         
-  uint8_t SetTemperature;       
-  bool Control;                
+  uint8_t SetTemperature = 20;       
+  bool Control = true;  
+  uint8_t SchTimes[7][4][2] = 
+  {
+    {{0, 8}, {16, 23}, {0, 0}, {0, 0}},
+    {{0, 8}, {16, 23}, {0, 0}, {0, 0}},
+    {{0, 8}, {16, 23}, {0, 0}, {0, 0}},
+    {{0, 8}, {16, 23}, {0, 0}, {0, 0}},
+    {{0, 8}, {16, 23}, {0, 0}, {0, 0}},
+    {{0, 8}, {16, 23}, {0, 0}, {0, 0}},
+    {{0, 8}, {16, 23}, {0, 0}, {0, 0}}
+  };              
 } Param;                       
 
 struct BufferData {
@@ -48,6 +71,9 @@ FtpServer ftpSrv;
 String webSite = "";
 String XML = "";
 bool readFlag = false;
+bool forceControl = false;
+RtcDS3231<TwoWire> rtc(Wire);
+RtcDateTime dt;
 
 SI7021 sht;
 float temperature = 0.0;
@@ -70,17 +96,6 @@ void push_bufferData(float temp, uint8_t hum, uint8_t hour) {
   }
   led_ctrl(LOW);
 }
-
-/*void get_bufferData() {
-    int eSize = sizeof(EbufferData);
-    EEPROM.begin(eSize);
-    EEPROM.get(EBUFFER_DATA_ADDR, EbufferData);
-    //EEPROM.end();
-    eSize = sizeof(EbufferParam);
-    EEPROM.begin(eSize);
-    EEPROM.get(EBUFFER_PARAM_ADDR, EbufferParam);
-    //EEPROM.end();
-}*/
 
 uint8_t get_bufferIndex(uint8_t addr) {
     int laddr = 0;
@@ -116,6 +131,17 @@ void upd_wt() {
       }
     }
   }
+}
+
+bool getCtrlFromSchedule(uint8_t dow, uint8_t hour) {
+  uint8_t tmp = 0;
+  for(uint8_t zone = 0; zone < 4; zone++) {
+    if((hour >= Param.SchTimes[dow][zone][0]) &&
+       (hour <= Param.SchTimes[dow][zone][1])) {
+         tmp++;
+    }
+  }
+  return (tmp > 0)?(true):(false);
 }
 
 uint32_t tws = 0;
@@ -170,6 +196,14 @@ void eeprom_init() {
   Param.ChipID = ESP.getChipId();
   Param.SetTemperature = 25;
   Param.Control = true;
+
+  for(uint8_t dow = 0; dow < 7; dow++) {
+    for(uint8_t zone = 0; zone < 4; zone++) {
+      Param.SchTimes[dow][zone][0] = defSchTimes[dow][zone][0];
+      Param.SchTimes[dow][zone][1] = defSchTimes[dow][zone][1];
+    }
+  }
+
   EEPROM.put(PARAM_ADDR, Param);
   EEPROM.end();
   Serial.println("EEPROM initialization completed");
@@ -195,6 +229,9 @@ void build_XML() {
   XML +=      "<x_ctrl>";
   XML +=        Param.Control;
   XML +=      "</x_ctrl>";
+  XML +=      "<x_forceCtrl>";
+  XML +=        forceControl;
+  XML +=      "</x_forceCtrl>";
   XML +=      "<x_out1>";
   XML +=        OUT1State;
   XML +=      "</x_out1>";
@@ -219,8 +256,18 @@ void build_XML() {
     XML +=        get_bufferHour(i);
     XML +=      "</x_bhour>"; 
   }
-  XML +=     "</xml>";
 
+  for(uint8_t dw = 0; dw < 7; dw++) {
+    for(uint8_t tz = 0; tz < 4; tz++) {
+      for(uint8_t t = 0; t < 2; t++) {
+        XML +=      "<x_scht>";
+        XML +=      Param.SchTimes[dw][tz][t];
+        XML +=      "</x_scht>"; 
+      }
+    }
+  }
+
+  XML +=     "</xml>";
   // Serial.println(XML);
 }
 
@@ -294,6 +341,30 @@ void h_clickBut() {
   server.send(200, "text/xml", XML);
 }
 
+void h_factoryDef() {
+  eeprom_init();
+}
+
+void h_setSchedule() {
+  Serial.println(F("Set param handler: "));
+  
+  Serial.print(F("Server has: ")); Serial.print(server.args()); Serial.println(F(" argument(s):"));
+
+  String argName[] = {"dow", "zone", "from", "to"};
+  uint8_t argVal[4];
+  
+  for(int i = 0; i < server.args(); i++) {
+    argVal[i] = server.arg(argName[i]).toInt();
+    Serial.print(F("arg name: ")); Serial.print(server.argName(i)); Serial.print(F(", value: ")); Serial.println(argVal[i]);
+  }
+
+  if((server.hasArg("zone")) && (server.hasArg("from")) && (server.hasArg("to"))) {
+    Param.SchTimes[argVal[0] - 1][argVal[1] - 1][0] = argVal[2];
+    Param.SchTimes[argVal[0] - 1][argVal[1] - 1][1] = argVal[3];
+    save_param();    
+  }
+}
+
 void h_setParam() {
   Serial.println(F("Set param handler: "));
   
@@ -313,6 +384,13 @@ void h_setParam() {
     Serial.print(F("setCtrl: ")); Serial.println(server.arg("setCtrl"));
     if(server.arg("setCtrl") == "false") Param.Control = false;
     if(server.arg("setCtrl") == "true") Param.Control = true;
+    save_param(); 
+  }
+
+  if(server.hasArg("setForceCtrl")) {
+    Serial.print(F("setForceCtrl: ")); Serial.println(server.arg("setForceCtrl"));
+    if(server.arg("setForceCtrl") == "false") forceControl = false;
+    if(server.arg("setForceCtrl") == "true") forceControl = true;
     save_param(); 
   }
 
@@ -426,6 +504,8 @@ void setup() {
   server.on("/clickBut", h_clickBut);
   server.on("/setParam", h_setParam);
   server.on("/wifi_param", h_wifi_param);
+  server.on("/zoneParam", h_setSchedule);
+  server.on("/factoryDef", h_factoryDef);
   server.begin();
 
   os_timer_disarm(&timer);
@@ -439,7 +519,8 @@ void setup() {
   OUT2State = LOW;
   /**************************************************************/
 
-  sht.begin(SDA, SCL);
+  rtc.Begin();
+  sht.begin(SDA, SCL);  
 
   Serial.print(F("Param      size: ")); Serial.println(sizeof(Param));
   Serial.print(F("BufferData size: ")); Serial.println(sizeof(BufferData)); 
@@ -448,14 +529,6 @@ void setup() {
   Serial.print(F("ChipID: ")); Serial.println(Param.ChipID);
   Serial.print(F("Control: ")); Serial.println(Param.Control);
   Serial.print(F("Set temperature: ")); Serial.println(Param.SetTemperature);
-  Serial.println("");
-
-  Serial.println(F("EbufferData: "));
-  for(int i = 0; i < BUFFER_SIZE; i++) {
-    Serial.print(F("Temp: ")); Serial.print(get_bufferTemp(i));
-    Serial.print(F(", Hum: ")); Serial.print(get_bufferHum(i));
-    Serial.print(F(", Hour: ")); Serial.println(get_bufferHour(i));
-  }
   Serial.println("");
 }
 
@@ -468,13 +541,20 @@ void loop() {
 
   if(readFlag) {
     readFlag = false;
+
+    dt = rtc.GetDateTime();
+
     temperature = constrF((sht.getCelsiusHundredths() / 100.0), 10.0, 40.0);
     humidity = constr(sht.getHumidityPercent(), 0, 100);
-    if((WorkTime.minute == 0) && (WorkTime.second == 0)) {
-      push_bufferData(temperature, humidity, WorkTime.hour);
+
+    if((dt.Minute() == 0) && (dt.Second() == 0)) {
+      push_bufferData(temperature, humidity, dt.Hour());
     }    
+
     build_XML();
-    if(Param.Control == 1) {
+
+    if((Param.Control == 1) && ((getCtrlFromSchedule(0, dt.Hour())) || (forceControl))) {
+      
       if(temperature <= (float)(Param.SetTemperature - 1)) {
         digitalWrite(OUT1, HIGH);
         OUT1State = HIGH;
