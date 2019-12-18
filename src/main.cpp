@@ -25,13 +25,13 @@ const char* ap_password = "Casper8266";
 
 const uint8_t defSchTimes[7][4][2] = 
 {
-  {{0, 8}, {16, 23}, {0, 0}, {0, 0}},
-  {{0, 8}, {16, 23}, {0, 0}, {0, 0}},
-  {{0, 8}, {16, 23}, {0, 0}, {0, 0}},
-  {{0, 8}, {16, 23}, {0, 0}, {0, 0}},
-  {{0, 8}, {16, 23}, {0, 0}, {0, 0}},
-  {{0, 8}, {16, 23}, {0, 0}, {0, 0}},
-  {{0, 8}, {16, 23}, {0, 0}, {0, 0}}
+  {{0, 8}, {16, 24}, {0, 0}, {0, 0}},
+  {{0, 8}, {16, 24}, {0, 0}, {0, 0}},
+  {{0, 8}, {16, 24}, {0, 0}, {0, 0}},
+  {{0, 8}, {16, 24}, {0, 0}, {0, 0}},
+  {{0, 8}, {16, 24}, {0, 0}, {0, 0}},
+  {{0, 8}, {16, 24}, {0, 0}, {0, 0}},
+  {{0, 8}, {16, 24}, {0, 0}, {0, 0}}
 };  
 
 struct Param {
@@ -40,13 +40,13 @@ struct Param {
   bool Control = true;  
   uint8_t SchTimes[7][4][2] = 
   {
-    {{0, 8}, {16, 23}, {0, 0}, {0, 0}},
-    {{0, 8}, {16, 23}, {0, 0}, {0, 0}},
-    {{0, 8}, {16, 23}, {0, 0}, {0, 0}},
-    {{0, 8}, {16, 23}, {0, 0}, {0, 0}},
-    {{0, 8}, {16, 23}, {0, 0}, {0, 0}},
-    {{0, 8}, {16, 23}, {0, 0}, {0, 0}},
-    {{0, 8}, {16, 23}, {0, 0}, {0, 0}}
+    {{0, 8}, {16, 24}, {0, 0}, {0, 0}},
+    {{0, 8}, {16, 24}, {0, 0}, {0, 0}},
+    {{0, 8}, {16, 24}, {0, 0}, {0, 0}},
+    {{0, 8}, {16, 24}, {0, 0}, {0, 0}},
+    {{0, 8}, {16, 24}, {0, 0}, {0, 0}},
+    {{0, 8}, {16, 24}, {0, 0}, {0, 0}},
+    {{0, 8}, {16, 24}, {0, 0}, {0, 0}}
   };              
 } Param;                       
 
@@ -137,7 +137,7 @@ bool getCtrlFromSchedule(uint8_t dow, uint8_t hour) {
   uint8_t tmp = 0;
   for(uint8_t zone = 0; zone < 4; zone++) {
     if((hour >= Param.SchTimes[dow][zone][0]) &&
-       (hour <= Param.SchTimes[dow][zone][1])) {
+       (hour < Param.SchTimes[dow][zone][1])) {
          tmp++;
     }
   }
@@ -210,10 +210,31 @@ void eeprom_init() {
   Serial.println("");
 }
 
+String getTimeStr()
+{
+    char str[9];
+    sprintf(str, 
+            "%02u:%02u:%02u",
+            dt.Hour(),
+            dt.Minute(),
+            dt.Second());
+    return str;
+}
+
+String getDateStr()
+{
+    char str[11];
+    sprintf(str, 
+            "%02u-%02u-%04u",
+            dt.Day(),
+            dt.Month(),
+            dt.Year());
+    return str;
+}
+
 /* Функция формирования строки XML данных */
 void build_XML() {
   char txt[16];
-  // uint32_t tws = ESP.getCycleCount() / 80000000;
   XML = "<?xml version='1.0'?>";
   XML +=    "<xml>";
   XML +="     <x_temp>";
@@ -256,7 +277,6 @@ void build_XML() {
     XML +=        get_bufferHour(i);
     XML +=      "</x_bhour>"; 
   }
-
   for(uint8_t dw = 0; dw < 7; dw++) {
     for(uint8_t tz = 0; tz < 4; tz++) {
       for(uint8_t t = 0; t < 2; t++) {
@@ -266,6 +286,13 @@ void build_XML() {
       }
     }
   }
+  /* Date . Time */
+  XML +=      "<x_time>";
+  XML +=        getTimeStr();
+  XML +=      "</x_time>";
+  XML +=      "<x_date>";
+  XML +=        getDateStr();
+  XML +=      "</x_date>";
 
   XML +=     "</xml>";
   // Serial.println(XML);
@@ -291,8 +318,8 @@ bool loadFromSpiffs(String path) {
   else if(path.endsWith(".pdf")) dataType = "application/pdf";
   else if(path.endsWith(".zip")) dataType = "application/zip";
   File dataFile = SPIFFS.open(path.c_str(), "r");
-  Serial.print(F("File: "));
-  Serial.println(dataFile.name());
+  //Serial.print(F("File: "));
+  //Serial.println(dataFile.name());
   if (server.hasArg("download")) dataType = "application/octet-stream";
   if (server.streamFile(dataFile, dataType) != dataFile.size()) {}
 
@@ -322,7 +349,7 @@ void handleWebRequests() {
 /* Обработчик/handler запроса HTML страницы */
 /* Отправляет клиенту(браузеру) HTML страницу */
 void h_Website() {  
-  Serial.println("HTML handler");
+  //Serial.println("HTML handler");
   server.sendHeader("Location", "/index.html", true);   //Redirect to our html web page
   server.send(302, "text/plane", "");
 }
@@ -346,16 +373,15 @@ void h_factoryDef() {
 }
 
 void h_setSchedule() {
-  Serial.println(F("Set param handler: "));
+  /*Serial.println(F("Set param handler: "));
   
-  Serial.print(F("Server has: ")); Serial.print(server.args()); Serial.println(F(" argument(s):"));
+  Serial.print(F("Server has: ")); Serial.print(server.args()); Serial.println(F(" argument(s):"));*/
 
-  String argName[] = {"dow", "zone", "from", "to"};
   uint8_t argVal[4];
   
   for(int i = 0; i < server.args(); i++) {
-    argVal[i] = server.arg(argName[i]).toInt();
-    Serial.print(F("arg name: ")); Serial.print(server.argName(i)); Serial.print(F(", value: ")); Serial.println(argVal[i]);
+    argVal[i] = server.arg(i).toInt();
+    //Serial.print(F("arg name: ")); Serial.print(server.argName(i)); Serial.print(F(", value: ")); Serial.println(argVal[i]);
   }
 
   if((server.hasArg("zone")) && (server.hasArg("from")) && (server.hasArg("to"))) {
@@ -366,32 +392,42 @@ void h_setSchedule() {
 }
 
 void h_setParam() {
-  Serial.println(F("Set param handler: "));
+  /*Serial.println(F("Set param handler: "));
   
   Serial.print(F("Server has: ")); Serial.print(server.args()); Serial.println(F(" argument(s):"));
   
   for(int i = 0; i < server.args(); i++) {
-    Serial.print(F("arg name: ")); Serial.println(server.argName(i));
-  }
+    Serial.print(F("arg name: ")); Serial.print(server.argName(i)); Serial.print(F(", value: ")); Serial.println(server.arg(i));
+  }*/
 
   if(server.hasArg("setTemp")) {
-    Serial.print(F("setTemp: ")); Serial.println(server.arg("setTemp"));
+    //Serial.print(F("setTemp: ")); Serial.println(server.arg("setTemp"));
     Param.SetTemperature = server.arg("setTemp").toInt();
     save_param();    
   }
 
   if(server.hasArg("setCtrl")) {
-    Serial.print(F("setCtrl: ")); Serial.println(server.arg("setCtrl"));
+    //Serial.print(F("setCtrl: ")); Serial.println(server.arg("setCtrl"));
     if(server.arg("setCtrl") == "false") Param.Control = false;
     if(server.arg("setCtrl") == "true") Param.Control = true;
     save_param(); 
   }
 
   if(server.hasArg("setForceCtrl")) {
-    Serial.print(F("setForceCtrl: ")); Serial.println(server.arg("setForceCtrl"));
+    //Serial.print(F("setForceCtrl: ")); Serial.println(server.arg("setForceCtrl"));
     if(server.arg("setForceCtrl") == "false") forceControl = false;
     if(server.arg("setForceCtrl") == "true") forceControl = true;
     save_param(); 
+  }
+
+  if((server.hasArg("hour")) && (server.hasArg("minute"))) {
+    rtc.SetDateTime(RtcDateTime(dt.Year(), dt.Month(), dt.Day(), server.arg("hour").toInt(), server.arg("minute").toInt(), 0));
+  }
+
+  if((server.hasArg("day")) && (server.hasArg("month")) && (server.hasArg("year"))) {
+    rtc.SetDateTime(RtcDateTime(server.arg("year").toInt(),
+                                server.arg("month").toInt(),
+                                server.arg("day").toInt(), dt.Hour(), dt.Minute(), dt.Second()));
   }
 
   build_XML();
@@ -521,15 +557,7 @@ void setup() {
 
   rtc.Begin();
   sht.begin(SDA, SCL);  
-
-  Serial.print(F("Param      size: ")); Serial.println(sizeof(Param));
-  Serial.print(F("BufferData size: ")); Serial.println(sizeof(BufferData)); 
-  Serial.println("");
-
-  Serial.print(F("ChipID: ")); Serial.println(Param.ChipID);
-  Serial.print(F("Control: ")); Serial.println(Param.Control);
-  Serial.print(F("Set temperature: ")); Serial.println(Param.SetTemperature);
-  Serial.println("");
+  // rtc.SetDateTime(RtcDateTime(2019, 12, 17, 14, 57, 0));
 }
 
 void loop() {
@@ -544,6 +572,9 @@ void loop() {
 
     dt = rtc.GetDateTime();
 
+    /* RtcDateTime compiled = RtcDateTime(__DATE__, __TIME__); */
+    // printDateTime(dt);
+
     temperature = constrF((sht.getCelsiusHundredths() / 100.0), 10.0, 40.0);
     humidity = constr(sht.getHumidityPercent(), 0, 100);
 
@@ -553,7 +584,7 @@ void loop() {
 
     build_XML();
 
-    if((Param.Control == 1) && ((getCtrlFromSchedule(0, dt.Hour())) || (forceControl))) {
+    if((Param.Control == 1) && ((getCtrlFromSchedule((dt.DayOfWeek() == 0)?(6):(dt.DayOfWeek() - 1), dt.Hour())) || (forceControl))) {
       
       if(temperature <= (float)(Param.SetTemperature - 1)) {
         digitalWrite(OUT1, HIGH);

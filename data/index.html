@@ -131,7 +131,15 @@
 				<tr><td><a href='/update'><button id='butFWUpdate'>Update</button></a></td></tr>
 				<tr><td><div id = "wt">---</div></td></tr>
 				<tr><td><div id = "heap">---</div></td></tr>
-				<tr><td><button id='butFactoryDef' value ='' type='submit' onclick='factoryDef()'>Заводские настроки</button></td></tr>
+				<tr><td><button id='butFactoryDef' value ='' type='submit' onclick='factoryDef()'>Заводские настройки</button></td></tr>
+				<tr>
+					<td id='date'>--.--.----</td>
+					<td id='time'>--:--:--</td>
+				</tr>
+				<tr>
+					<td><input type='date' onchange='setDate(this.value)'></td>
+					<td><input type='time' onchange='setTime(this.value)'></td>
+				</tr>
 			</table>
 		</div>
 
@@ -351,6 +359,8 @@
 
 			var secondCnt = 0;	
 			var odlOutState1 = 0;
+			var timeEdit = false;
+			var dateEdit = false;
 
 			/* Выполняет запрос XML данных, далее выполняет запрос */
 			/* по таймауту раз в секунду */
@@ -361,7 +371,17 @@
 							xmlDoc = xmlHttp.responseXML;		
 							var lSetTemp = xmlDoc.getElementsByTagName('x_setTemp')[0].firstChild.nodeValue;
 							var lCtrl = (xmlDoc.getElementsByTagName('x_ctrl')[0].firstChild.nodeValue == 1)?(true):(false);	
-							var lForceCtrl = (xmlDoc.getElementsByTagName('x_forceCtrl')[0].firstChild.nodeValue == 1)?(true):(false);	
+							var lForceCtrl = (xmlDoc.getElementsByTagName('x_forceCtrl')[0].firstChild.nodeValue == 1)?(true):(false);
+
+							if(!timeEdit) {
+								xmlmsg = xmlDoc.getElementsByTagName('x_time')[0].firstChild.nodeValue;
+								document.getElementById('time').innerHTML = xmlmsg;	
+							}
+
+							if(!dateEdit) {
+								xmlmsg = xmlDoc.getElementsByTagName('x_date')[0].firstChild.nodeValue;
+								document.getElementById('date').innerHTML = xmlmsg;	
+							}
 
 							if(tmpChBCtrl != lCtrl)	{
 								chSetCtrl(lCtrl);	
@@ -475,6 +495,33 @@
 												 '&zone=' + zone +
 												 '&from=' + from +
 												 '&to=' + to, true);
+					xmlHttp.send();
+					dayOfWeekIsUpd = false;
+				}
+			}
+
+			function setTime(val) {	
+				console.log(val);		
+				var tp = val.split(":");
+				console.log(tp[1]);
+				console.log(tp[0]);
+				if((xmlHttp.readyState == 0) || (xmlHttp.readyState == 4)) {
+					xmlHttp.open('PUT', 'setParam?minute=' + tp[1] +
+												 '&hour=' + tp[0], true);
+					xmlHttp.send();
+					dayOfWeekIsUpd = false;
+				}
+			}
+			function setDate(val) {	
+				console.log(val);	
+				var dp = val.split("-");	
+				console.log(dp[2]);
+				console.log(dp[1]);
+				console.log(dp[0]);
+				if((xmlHttp.readyState == 0) || (xmlHttp.readyState == 4)) {
+					xmlHttp.open('PUT', 'setParam?day=' + dp[2] +
+												 '&month=' + dp[1] +
+												 '&year=' + dp[0], true);
 					xmlHttp.send();
 					dayOfWeekIsUpd = false;
 				}
@@ -618,7 +665,7 @@
 				grid_snap: true,
 				grid_margin: true,
 				min: 0,
-				max: 23,
+				max: 24,
 				from: 0,
 				to: 23,
 				postfix: "Ч",
@@ -671,7 +718,7 @@
 					console.log(4, data.from, data.to);
 				}
 			});
-			/**************************************/				
+			/**************************************/	
 		</script>
 		<div id="snackbar">---</div>
 	</body>
