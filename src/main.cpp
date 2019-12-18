@@ -71,9 +71,10 @@ FtpServer ftpSrv;
 String webSite = "";
 String XML = "";
 bool readFlag = false;
-bool forceControl = false;
+bool scheduleEn = true;
 RtcDS3231<TwoWire> rtc(Wire);
 RtcDateTime dt;
+RtcDateTime compiled = RtcDateTime(__DATE__, __TIME__);
 
 SI7021 sht;
 float temperature = 0.0;
@@ -250,9 +251,9 @@ void build_XML() {
   XML +=      "<x_ctrl>";
   XML +=        Param.Control;
   XML +=      "</x_ctrl>";
-  XML +=      "<x_forceCtrl>";
-  XML +=        forceControl;
-  XML +=      "</x_forceCtrl>";
+  XML +=      "<x_scheduleEn>";
+  XML +=        scheduleEn;
+  XML +=      "</x_scheduleEn>";
   XML +=      "<x_out1>";
   XML +=        OUT1State;
   XML +=      "</x_out1>";
@@ -293,9 +294,11 @@ void build_XML() {
   XML +=      "<x_date>";
   XML +=        getDateStr();
   XML +=      "</x_date>";
-
+  XML +=      "<x_dayOfWeek>";
+  XML +=        (dt.DayOfWeek() == 0)?(7):(dt.DayOfWeek());
+  XML +=      "</x_dayOfWeek>";
   XML +=     "</xml>";
-  // Serial.println(XML);
+  //Serial.println(XML);
 }
 
 bool loadFromSpiffs(String path) {
@@ -370,6 +373,8 @@ void h_clickBut() {
 
 void h_factoryDef() {
   eeprom_init();
+  server.sendHeader("Location", "/index.html", true);   //Redirect to our html web page
+  server.send(302, "text/plane", "");
 }
 
 void h_setSchedule() {
@@ -389,6 +394,8 @@ void h_setSchedule() {
     Param.SchTimes[argVal[0] - 1][argVal[1] - 1][1] = argVal[3];
     save_param();    
   }
+  build_XML();
+  server.send(200, "text/xml", XML);
 }
 
 void h_setParam() {
@@ -413,10 +420,10 @@ void h_setParam() {
     save_param(); 
   }
 
-  if(server.hasArg("setForceCtrl")) {
+  if(server.hasArg("setScheduleEn")) {
     //Serial.print(F("setForceCtrl: ")); Serial.println(server.arg("setForceCtrl"));
-    if(server.arg("setForceCtrl") == "false") forceControl = false;
-    if(server.arg("setForceCtrl") == "true") forceControl = true;
+    if(server.arg("setScheduleEn") == "false") scheduleEn = false;
+    if(server.arg("setScheduleEn") == "true") scheduleEn = true;
     save_param(); 
   }
 
@@ -471,8 +478,6 @@ void setup() {
   led_ctrl(LOW);
 
   sblink(10, 25);
-
-  delay(1000);
 
   Serial.println("");
   Serial.println(F("--- Wi-Fi config ---"));
@@ -530,7 +535,6 @@ void setup() {
   build_XML();       
 
   /* OTA */
-  // httpUpdater.setup(&server, ota_user, ota_pass);
   httpUpdater.setup(&server);
   
   // Регистрация обработчиков
@@ -557,7 +561,6 @@ void setup() {
 
   rtc.Begin();
   sht.begin(SDA, SCL);  
-  // rtc.SetDateTime(RtcDateTime(2019, 12, 17, 14, 57, 0));
 }
 
 void loop() {
@@ -572,19 +575,13 @@ void loop() {
 
     dt = rtc.GetDateTime();
 
-    /* RtcDateTime compiled = RtcDateTime(__DATE__, __TIME__); */
-    // printDateTime(dt);
-
     temperature = constrF((sht.getCelsiusHundredths() / 100.0), 10.0, 40.0);
     humidity = constr(sht.getHumidityPercent(), 0, 100);
 
     if((dt.Minute() == 0) && (dt.Second() == 0)) {
       push_bufferData(temperature, humidity, dt.Hour());
     }    
-
-    build_XML();
-
-    if((Param.Control == 1) && ((getCtrlFromSchedule((dt.DayOfWeek() == 0)?(6):(dt.DayOfWeek() - 1), dt.Hour())) || (forceControl))) {
+    if((Param.Control == 1) && ((getCtrlFromSchedule((dt.DayOfWeek() == 0)?(6):(dt.DayOfWeek() - 1), dt.Hour())) || (!scheduleEn))) {
       
       if(temperature <= (float)(Param.SetTemperature - 1)) {
         digitalWrite(OUT1, HIGH);
@@ -599,5 +596,6 @@ void loop() {
       digitalWrite(OUT1, LOW);
       OUT1State = LOW;
     }
+    build_XML();
   }
 }

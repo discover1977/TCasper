@@ -21,17 +21,17 @@ a:hover {
 .content {
 	max-width: 800px;
 	margin: auto;
-	padding: 16px 32px;
+	padding: 4px 4px;
 }
 
 .header {
 	text-align: center;
-	padding: 32px 0;
+	padding: 8px 0;
 }
 
 .wrapper {
 	min-height: 50px;
-	padding: 16px 0;
+	padding: 4px 0;
 	position: relative;
 }
 
@@ -58,7 +58,7 @@ a:hover {
 }
 
 .toolbar > * {
-	margin: 0 8px 0 0;
+	margin: 0px;
 }
 
 .btn {

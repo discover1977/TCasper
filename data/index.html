@@ -17,28 +17,32 @@
 		<script async src = "gauge.min.js.gz" onload = "initScriptedGauges()"></script>
 	</head>
 	<body>
-		
 		<button class="tablink" onclick = "openPage('Home', this, 'rgb(240, 157, 62)')"  id = "defaultOpen">ДОМ</button>
 		<button class="tablink" onclick = "openPage('Schedule', this, 'rgb(63, 114, 156)')">РАСПИСАНИЕ</button>
 		<button class="tablink" onclick = "openPage('Settings', this, 'rgb(0, 117, 82)')">НАСТРОЙКИ</button>
-
 		<div id="Home" class="tabcontent">
 			<table style='width: 100%'>
 				<tr>
-					<td>
-						<canvas id='gTemp' style='margin-top: 20px'></canvas>
-					</td>			
-					<td>
-						<canvas id='gHum' style='margin-top: 20px'></canvas>						
-					</td>
-				</tr>							
-			</table>
-			<table style='width:100%'>	
+					<td id='date' style = "font-size: 24px">01-01-2019</td>
+					<td id='time' style = "font-size: 24px">18:45:00</td>
+				</tr>
 				<tr>
-					<td>
+					<td><canvas id='gTemp' style='margin-top: 0px'></canvas></td>
+					<td><canvas id='gHum' style='margin-top: 0px'></canvas></td>
+				</tr>
+				<tr>
+					<td colspan="2">
 						<div class="content">
 							<div class = "wrapper"><canvas id = "canvas"></canvas></div>
 						</div>
+					</td>
+				</tr>
+				<tr>
+					<td style = "font-size: 16">
+						Управление
+					</td>
+					<td style = "font-size: 16px">
+						Расписание
 					</td>
 				</tr>
 				<tr>
@@ -46,72 +50,92 @@
 						<label class="switch">
 							<input type="checkbox" id="ctrl" onchange="chSetCtrl(this.checked)">
 							<span class="range round"></span>
-						</label>				
+						</label>
 					</td>
-				</tr>	
-				<tr>
 					<td>
 						<label class="switch">
-							<input type="checkbox" id="forceCtrl" onchange="chSetForceCtrl(this.checked)">
+							<input type="checkbox" id="scheduleEn" onchange="chSetSchedule(this.checked)">
 							<span class="range round"></span>
-						</label>				
+						</label>	
 					</td>
-				</tr>			
+				</tr>
 				<tr>
-					<td>
-						<input type = "range" min = "16" max = "35" list = "tickmarks" value = "25" class = "slider"
-						id = "rTemp" onchange = "chSetTemp(this.value)">
+					<td colspan="2" style = "font-size: 16px">
+						<i>Температура</i>
 					</td>
-				</tr>				
+				</tr>
+				<tr>
+					<td colspan="2">
+						<input type = "range" min = "16" max = "35" list = "tickmarks" value = "25" class = "slider" id = "rTemp" onchange = "chSetTemp(this.value)">
+					</td>
+				</tr>
 			</table>
 		</div>
-
 		<div id = "Schedule" class="tabcontent">
-			<div class="form_radio_group">
-				<div class="form_radio_group-item">
-					<input id="mo" type="radio" name="radio" value="1" onchange = "chDayOfWeek(this.value)" checked>
-					<label for="mo">ПН</label>
-				</div>
-				<div class="form_radio_group-item">
-					<input id="tu" type="radio" name="radio" value="2" onchange = "chDayOfWeek(this.value)">
-					<label for="tu">ВТ</label>
-				</div>
-				<div class="form_radio_group-item">
-					<input id="we" type="radio" name="radio" value="3" onchange = "chDayOfWeek(this.value)">
-					<label for="we">СР</label>
-				</div>
-				<div class="form_radio_group-item">
-					<input id="th" type="radio" name="radio" value="4" onchange = "chDayOfWeek(this.value)">
-					<label for="th">ЧТ</label>
-				</div>
-				<div class="form_radio_group-item">
-					<input id="fr" type="radio" name="radio" value="5" onchange = "chDayOfWeek(this.value)">
-					<label for="fr">ПТ</label>
-				</div>
-				<div class="form_radio_group-item">
-					<input id="sa" type="radio" name="radio" value="6" onchange = "chDayOfWeek(this.value)">
-					<label for="sa">СБ</label>
-				</div>
-				<div class="form_radio_group-item">
-					<input id="su" type="radio" name="radio" value="7" onchange = "chDayOfWeek(this.value)">
-					<label for="su">ВС</label>
-				</div>
-			</div>
-
-			<div class="range-slider">
-				<input type="text" class="js-range-slider-1" value="1/>
-			</div>
-			<div class="range-slider">
-				<input type="text" class="js-range-slider-2" value="2"/>
-			</div>
-			<div class="range-slider">
-				<input type="text" class="js-range-slider-3" value="3/>
-			</div>
-			<div class="range-slider">
-				<input type="text" class="js-range-slider-4" value="4"/>
-			</div>
+			<table style='width: 100%; margin-top: 40px;'>
+				<tr>
+					<td>
+						<div class="range-slider">
+							<input type="text" class="js-range-slider-1" value="1"/>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<div class="range-slider">
+							<input type="text" class="js-range-slider-2" value="2"/>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<div class="range-slider">
+							<input type="text" class="js-range-slider-3" value="3"/>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<div class="range-slider">
+							<input type="text" class="js-range-slider-4" value="5"/>
+						</div>
+					</td>
+				</tr>
+					<td>
+						<div class="flex-container">
+							<div class='form_radio_group-item'>
+								<input type='radio' name='dow' id='mo' value="1" onchange = "chDayOfWeek(this.value)" checked>
+								<label for="mo">ПН</label>
+							</div>
+							<div class='form_radio_group-item'>
+								<input type='radio' name='dow' id='tu' value="2" onchange = "chDayOfWeek(this.value)">
+								<label for="tu">ВТ</label>
+							</div>
+							<div class='form_radio_group-item'>
+								<input type='radio' name='dow' id='we' value="3" onchange = "chDayOfWeek(this.value)">
+								<label for="we">СР</label>
+							</div>
+							<div class='form_radio_group-item'>
+								<input type='radio' name='dow' id='th' value="4" onchange = "chDayOfWeek(this.value)">
+								<label for="th">ЧТ</label>
+							</div>
+							<div class='form_radio_group-item'>
+								<input type='radio' name='dow' id='fr' value="5" onchange = "chDayOfWeek(this.value)">
+								<label for="fr">ПТ</label>
+							</div>
+							<div class='form_radio_group-item'>
+								<input type='radio' name='dow' id='sa' value="6" onchange = "chDayOfWeek(this.value)">
+								<label for="sa">СБ</label>
+							</div>
+							<div class='form_radio_group-item'>
+								<input type='radio' name='dow' id='su' value="7" onchange = "chDayOfWeek(this.value)">
+								<label for="su">ВС</label>
+							</div>
+						</div>
+					</td>
+				</tr>
+			</table>
 		</div>
-
 		<div id = "Settings" class = "tabcontent">
 			<!--<img src="\image.png" alt="Image from ESP8266" width="128" height="128">-->
 			<table style='width:100%'>
@@ -133,8 +157,8 @@
 				<tr><td><div id = "heap">---</div></td></tr>
 				<tr><td><button id='butFactoryDef' value ='' type='submit' onclick='factoryDef()'>Заводские настройки</button></td></tr>
 				<tr>
-					<td id='date'>--.--.----</td>
-					<td id='time'>--:--:--</td>
+					<td id='date_sp'>--.--.----</td>
+					<td id='time_sp'>--:--:--</td>
 				</tr>
 				<tr>
 					<td><input type='date' onchange='setDate(this.value)'></td>
@@ -142,10 +166,8 @@
 				</tr>
 			</table>
 		</div>
-
 		<script>
 			xmlHttp = createXmlHttpObject();
-			
 			/* Функция создания XML объекта */
 			function createXmlHttpObject() {
 				if(window.XMLHttpRequest) {
@@ -155,7 +177,6 @@
 				}
 				return xmlHttp;
 			}
-
 			function openPage(pageName, elmnt, color) {
 				var i, tabcontent, tablinks;
 				tabcontent = document.getElementsByClassName("tabcontent");
@@ -170,12 +191,10 @@
 				elmnt.style.backgroundColor = color;
 			}
 			document.getElementById("defaultOpen").click();
-
 			var scht = [];
 			var dayOfWeek = 1;
 			var dayOfWeekIsUpd = false;
 			for(var i = 0; i < 56; i++) scht.push(0);
-
 			var temp = 0.0;
 			var hum = 0;
 			var gTemp;
@@ -183,21 +202,16 @@
 			var cTemp;
 			var cHum;
 			var rTemp = document.getElementById("rTemp");
-
 			var tmpChBCtrl = false;
-			var tmpChBForceCtrl = false;
+			var tmpChBScheduleEn = true;
 			var tmpSetTemp = 0;
-
 			rTemp.oninput = function() {
 				chInputTemp(this.value);
 			}
-
-			/****************************************************** CHART ******************************************************/
-			/*******************************************************************************************************************/
+			/* CHART */
 			var lName = [];
 			var tSeries = [];
 			var hSeries = [];
-
 			var config = {
 				type: 'line',
 				data: {
@@ -243,25 +257,20 @@
 				}
 			};
 			var myChart;			
-
 			function init_chart() {
 				var ctx = document.getElementById('canvas').getContext('2d');
 				myChart = new Chart(ctx, config);
 			}
-			/**************************************************************************************************************************/
-			/**************************************************************************************************************************/
 			var gScale = 4.5;
 			var gHeight = document.body.clientHeight / gScale;
 			var gWidth = gHeight;
 			var scale = 0.7;
-
 			document.addEventListener("DOMContentLoaded", function(event) {
 				window.onresize = function() {
 					resize_info();
 				};
 				process();
 			});
-
 			function resize_info() {
 				gWidth = gHeight = document.body.clientHeight / gScale;		
 				gTemp.update({
@@ -273,9 +282,7 @@
 					height: gHeight
 				});				
 			}
-
 			var starUpSetRange = false;
-
 			function chInputTemp(val) {				
 				gTemp.update({
 					highlights: [
@@ -302,7 +309,6 @@
 					]
 				});
 			}
-
 			var lShow = false;
 			function chSetTemp(val) {
 				tmpSetTemp = val;
@@ -319,7 +325,6 @@
 					snackbar(str);
 				}		
 			}
-
 			var oldCtrlState = false;
 			function chSetCtrl(val) {
 				tmpChBCtrl = val;
@@ -329,81 +334,67 @@
 				}		
 				if(oldCtrlState != val) {
 					var str = "Управление: ";
-					str += ((!oldCtrlState)?("ВКЛ"):("ВЫКЛ"));
+					str += ((oldCtrlState)?("ВКЛ"):("ВЫКЛ"));
 					oldCtrlState = val;
 					snackbar(str);
 				}		
 			}
-
-			var oldForceCtrlState = false;
-			function chSetForceCtrl(val) {
-				tmpChBForceCtrl = val;
+			//var oldScheduleState = true;
+			function chSetSchedule(val) {
+				//tmpChBScheduleEn = val;
 				if((xmlHttp.readyState == 0) || (xmlHttp.readyState == 4)) {
-					xmlHttp.open('PUT', 'setParam?setForceCtrl=' + val, true);
+					xmlHttp.open('PUT', 'setParam?setScheduleEn=' + val, true);
 					xmlHttp.send();
 				}	
-				if(oldForceCtrlState != val) {
-					var str = "Force control: ";
-					str += ((!oldForceCtrlState)?("ВКЛ"):("ВЫКЛ"));
-					oldForceCtrlState = val;
-					snackbar(str);
-				}		
+				var str = "Расписание: ";
+				str += ((oldScheduleState)?("ВКЛ"):("ВЫКЛ"));
+				oldScheduleState = val;
+				snackbar(str);	
 			}
-
 			function factoryDef() {
 				if((xmlHttp.readyState == 0) || (xmlHttp.readyState == 4)) {
 					xmlHttp.open('PUT', 'factoryDef', true);
 					xmlHttp.send();
 				}
 			}
-
 			var secondCnt = 0;	
 			var odlOutState1 = 0;
 			var timeEdit = false;
 			var dateEdit = false;
-
-			/* Выполняет запрос XML данных, далее выполняет запрос */
-			/* по таймауту раз в секунду */
 			function process() {
 				if((xmlHttp.readyState == 0) || (xmlHttp.readyState == 4)) {
 					xmlHttp.onreadystatechange = function() {
 						if((xmlHttp.readyState == 4) && (xmlHttp.status == 200)) {
-							xmlDoc = xmlHttp.responseXML;		
+							xmlDoc = xmlHttp.responseXML;	
 							var lSetTemp = xmlDoc.getElementsByTagName('x_setTemp')[0].firstChild.nodeValue;
 							var lCtrl = (xmlDoc.getElementsByTagName('x_ctrl')[0].firstChild.nodeValue == 1)?(true):(false);	
-							var lForceCtrl = (xmlDoc.getElementsByTagName('x_forceCtrl')[0].firstChild.nodeValue == 1)?(true):(false);
-
+							var lScheduleEn = (xmlDoc.getElementsByTagName('x_scheduleEn')[0].firstChild.nodeValue == 1)?(true):(false);
+							document.getElementById('scheduleEn').checked = lScheduleEn;
 							if(!timeEdit) {
 								xmlmsg = xmlDoc.getElementsByTagName('x_time')[0].firstChild.nodeValue;
 								document.getElementById('time').innerHTML = xmlmsg;	
+								document.getElementById('time_sp').innerHTML = xmlmsg;	
 							}
-
 							if(!dateEdit) {
 								xmlmsg = xmlDoc.getElementsByTagName('x_date')[0].firstChild.nodeValue;
 								document.getElementById('date').innerHTML = xmlmsg;	
+								document.getElementById('date_sp').innerHTML = xmlmsg;	
 							}
-
 							if(tmpChBCtrl != lCtrl)	{
 								chSetCtrl(lCtrl);	
 								document.getElementById('ctrl').checked = lCtrl;	
 							}	
-
-							if(tmpChBForceCtrl != lForceCtrl)	{
-								chSetForceCtrl(lForceCtrl);	
-								document.getElementById('forceCtrl').checked = lForceCtrl;	
-							}
-
 							if(tmpSetTemp != lSetTemp) {
 								chSetTemp(lSetTemp);
 								document.getElementById('rTemp').value = lSetTemp;	
 							}
-			
 							if(starUpSetRange == false) {
+								dayOfWeek = xmlDoc.getElementsByTagName('x_dayOfWeek')[0].firstChild.nodeValue;	
+								setRBDayOfWeek(dayOfWeek);
 								document.getElementById('rTemp').value = lSetTemp;
 								chInputTemp(lSetTemp);							
 								document.getElementById('ctrl').checked = (lCtrl == "1")?(true):(false);
 								starUpSetRange = true;
-
 								for(var i = 0; i < 24; i++) {
 									xmlmsg = xmlDoc.getElementsByTagName('x_btemp')[i].firstChild.nodeValue;
 									tSeries.push(xmlmsg);									
@@ -419,7 +410,6 @@
 								}
 								init_chart();
 							}
-
 							if(!dayOfWeekIsUpd) {
 								for(var schtCnt = 0; schtCnt < 56; schtCnt++) {
 									xmlmsg = xmlDoc.getElementsByTagName('x_scht')[schtCnt].firstChild.nodeValue;
@@ -427,8 +417,7 @@
 								}
 								set_schRange(dayOfWeek);
 								dayOfWeekIsUpd = true;
-							}
-			
+							}			
 							xmlmsg = xmlDoc.getElementsByTagName('x_temp')[0].firstChild.nodeValue;	
 							//document.getElementById('html_temp').innerHTML = xmlmsg;	
 							temp = xmlmsg;
@@ -487,6 +476,18 @@
 				}
 				setTimeout('process()', 1000);	// таймаут запроса XML
 			}	
+
+			function setRBDayOfWeek(val) {
+				switch(val) {
+					case "1": {document.getElementById('mo').checked = true}; break;
+					case "2": {document.getElementById('tu').checked = true}; break;
+					case "3": {document.getElementById('we').checked = true}; break;
+					case "4": {document.getElementById('th').checked = true}; break;
+					case "5": {document.getElementById('fr').checked = true}; break;
+					case "6": {document.getElementById('sa').checked = true}; break;
+					case "7": {document.getElementById('su').checked = true}; break;
+				}
+			}
 
 			function setZoneRange(zone, from, to) {
 				snackbar("Zone: " + zone + ", From: " + from + ", To: " + to);				
