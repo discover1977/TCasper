@@ -23,8 +23,8 @@
 		<div id="Home" class="tabcontent">
 			<table style='width: 100%'>
 				<tr>
-					<td id='date' style = "font-size: 24px">01-01-2019</td>
-					<td id='time' style = "font-size: 24px">18:45:00</td>
+					<td id='date' style = "font-size: 24px">00-00-0000</td>
+					<td id='time' style = "font-size: 24px">00:00:00</td>
 				</tr>
 				<tr>
 					<td><canvas id='gTemp' style='margin-top: 0px'></canvas></td>
@@ -140,31 +140,35 @@
 			<!--<img src="\image.png" alt="Image from ESP8266" width="128" height="128">-->
 			<table style='width:100%'>
 				<tr>
-					<td>
-						<br>
-						<form action="/wifi_param"  method="post">
-							SSID:<br>
-							<input type="text" name="SSID" value=""><br>
-							Password:<br>
-							<input type="password" name="stapass"><br><br>
-							<input type="submit" value="Submit">
-						</form>
-						<br>
+					<td id='date_sp' style = "font-size: 24px; width:50%;">00-00-0000</td>
+					<td id='time_sp' style = "font-size: 24px; width:50%;">00:00:00</td>
+				</tr>
+				<tr>
+					<td colspan="2">
+						<button id='butSetDateTime' value ='' type='submit' onclick="setDateTime()">Установить дату/время</button>
+						<hr>
 					</td>
 				</tr>
-				<tr><td><a href='/update'><button id='butFWUpdate'>Update</button></a></td></tr>
-				<tr><td><div id = "wt">---</div></td></tr>
-				<tr><td><div id = "heap">---</div></td></tr>
-				<tr><td><button id='butFactoryDef' value ='' type='submit' onclick='factoryDef()'>Заводские настройки</button></td></tr>
 				<tr>
-					<td id='date_sp'>--.--.----</td>
-					<td id='time_sp'>--:--:--</td>
+					<td colspan="2">AP Settings</td>
 				</tr>
 				<tr>
-					<td><input type='date' onchange='setDate(this.value)'></td>
-					<td><input type='time' onchange='setTime(this.value)'></td>
+					<td colspan="2">
+						<form action="/wifi_param"  method="post">						
+							<label for="SSID">SSID: </label><br>
+							<input type="text" name="SSID" value=""><br>
+							<label for="stapass">Password: </label><br>
+							<input type="password" name="stapass"><br>
+							<input type="submit" value="Submit">
+							<hr>
+						</form>
+					</td>
 				</tr>
-			</table>
+				<tr>
+					<td><button id='butFactoryDef' value ='' type='submit' onclick='factoryDef()'>Заводские настройки</button></td>
+					<td><a href='/update'><button id='butFWUpdate'>Update</button></a></td>
+				</tr>
+			</table>		
 		</div>
 		<script>
 			xmlHttp = createXmlHttpObject();
@@ -334,7 +338,7 @@
 				}		
 				if(oldCtrlState != val) {
 					var str = "Управление: ";
-					str += ((oldCtrlState)?("ВКЛ"):("ВЫКЛ"));
+					str += ((!oldCtrlState)?("ВКЛ"):("ВЫКЛ"));
 					oldCtrlState = val;
 					snackbar(str);
 				}		
@@ -501,31 +505,35 @@
 				}
 			}
 
-			function setTime(val) {	
-				console.log(val);		
-				var tp = val.split(":");
-				console.log(tp[1]);
-				console.log(tp[0]);
+			function setTime() {	
+				var dt = new Date();
+				console.log(dt.getHours());
+				console.log(dt.getMinutes());
+				console.log(dt.getSeconds());
 				if((xmlHttp.readyState == 0) || (xmlHttp.readyState == 4)) {
-					xmlHttp.open('PUT', 'setParam?minute=' + tp[1] +
-												 '&hour=' + tp[0], true);
+					xmlHttp.open('PUT', 'setParam?minute=' + dt.getMinutes() +
+												 '&hour=' + dd.getHours(), true);
 					xmlHttp.send();
 					dayOfWeekIsUpd = false;
 				}
 			}
-			function setDate(val) {	
-				console.log(val);	
-				var dp = val.split("-");	
-				console.log(dp[2]);
-				console.log(dp[1]);
-				console.log(dp[0]);
+			function setDate() {	
+				var dt = new Date();				
+				console.log(dt.getDate());
+				console.log(dt.getMonth() + 1);
+				console.log(dt.getFullYear());
 				if((xmlHttp.readyState == 0) || (xmlHttp.readyState == 4)) {
-					xmlHttp.open('PUT', 'setParam?day=' + dp[2] +
-												 '&month=' + dp[1] +
-												 '&year=' + dp[0], true);
+					xmlHttp.open('PUT', 'setParam?day=' + dt.getDate() +
+												 '&month=' + (dt.getMonth() + 1) +
+												 '&year=' + dt.getFullYear(), true);
 					xmlHttp.send();
 					dayOfWeekIsUpd = false;
 				}
+			}
+
+			function setDateTime() {
+				setTime();				
+				setDate();
 			}
 
 			function set_schRange(dw) {
