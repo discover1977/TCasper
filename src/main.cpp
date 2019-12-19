@@ -68,13 +68,12 @@ struct WorkTime {
 ESP8266WebServer server(80);
 ESP8266HTTPUpdateServer httpUpdater;
 FtpServer ftpSrv;
-String webSite = "";
 String XML = "";
 bool readFlag = false;
 bool scheduleEn = true;
 RtcDS3231<TwoWire> rtc(Wire);
 RtcDateTime dt;
-RtcDateTime compiled = RtcDateTime(__DATE__, __TIME__);
+/*RtcDateTime compiled = RtcDateTime(__DATE__, __TIME__);*/
 
 SI7021 sht;
 float temperature = 0.0;
@@ -385,8 +384,8 @@ void h_setSchedule() {
   uint8_t argVal[4];
   
   for(int i = 0; i < server.args(); i++) {
-    argVal[i] = server.arg(i).toInt();
     //Serial.print(F("arg name: ")); Serial.print(server.argName(i)); Serial.print(F(", value: ")); Serial.println(argVal[i]);
+    argVal[i] = server.arg(i).toInt();
   }
 
   if((server.hasArg("zone")) && (server.hasArg("from")) && (server.hasArg("to"))) {
@@ -427,8 +426,11 @@ void h_setParam() {
     save_param(); 
   }
 
-  if((server.hasArg("hour")) && (server.hasArg("minute"))) {
-    rtc.SetDateTime(RtcDateTime(dt.Year(), dt.Month(), dt.Day(), server.arg("hour").toInt(), server.arg("minute").toInt(), 0));
+  if((server.hasArg("hour")) && (server.hasArg("minute")) && (server.hasArg("second"))) {
+    rtc.SetDateTime(RtcDateTime(dt.Year(), dt.Month(), dt.Day(),
+                                server.arg("hour").toInt(),
+                                server.arg("minute").toInt(),
+                                server.arg("second").toInt()));
   }
 
   if((server.hasArg("day")) && (server.hasArg("month")) && (server.hasArg("year"))) {
@@ -596,6 +598,6 @@ void loop() {
       digitalWrite(OUT1, LOW);
       OUT1State = LOW;
     }
-    build_XML();
+    //build_XML();
   }
 }

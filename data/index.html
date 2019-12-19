@@ -72,7 +72,7 @@
 			</table>
 		</div>
 		<div id = "Schedule" class="tabcontent">
-			<table style='width: 100%; margin-top: 40px;'>
+			<table style='width: 100%;'>
 				<tr>
 					<td>
 						<div class="range-slider">
@@ -144,13 +144,15 @@
 					<td id='time_sp' style = "font-size: 24px; width:50%;">00:00:00</td>
 				</tr>
 				<tr>
-					<td colspan="2">
-						<button id='butSetDateTime' value ='' type='submit' onclick="setDateTime()">Установить дату/время</button>
-						<hr>
+					<td>
+						<button id='butSetDateTime' value ='' type='submit' onclick="setDate()">Установить дату</button>
+					</td>
+					<td>
+						<button id='butSetDateTime' value ='' type='submit' onclick="setTime()">Установить время</button>
 					</td>
 				</tr>
 				<tr>
-					<td colspan="2">AP Settings</td>
+					<td colspan="2"><hr>AP Settings</td>
 				</tr>
 				<tr>
 					<td colspan="2">
@@ -168,7 +170,8 @@
 					<td><button id='butFactoryDef' value ='' type='submit' onclick='factoryDef()'>Заводские настройки</button></td>
 					<td><a href='/update'><button id='butFWUpdate'>Update</button></a></td>
 				</tr>
-			</table>		
+			</table>
+			<hr>		
 		</div>
 		<script>
 			xmlHttp = createXmlHttpObject();
@@ -469,10 +472,10 @@
 								myChart.update();
 							}
 
-							xmlmsg = xmlDoc.getElementsByTagName('x_wt')[0].firstChild.nodeValue;	
+							/*xmlmsg = xmlDoc.getElementsByTagName('x_wt')[0].firstChild.nodeValue;	
 							document.getElementById('wt').innerHTML = xmlmsg;
 							xmlmsg = xmlDoc.getElementsByTagName('x_heap')[0].firstChild.nodeValue;	
-							document.getElementById('heap').innerHTML = xmlmsg;
+							document.getElementById('heap').innerHTML = xmlmsg;*/
 						}
 					}
 					xmlHttp.open('PUT', 'xml', true);
@@ -511,8 +514,9 @@
 				console.log(dt.getMinutes());
 				console.log(dt.getSeconds());
 				if((xmlHttp.readyState == 0) || (xmlHttp.readyState == 4)) {
-					xmlHttp.open('PUT', 'setParam?minute=' + dt.getMinutes() +
-												 '&hour=' + dd.getHours(), true);
+					xmlHttp.open('PUT', 'setParam?second=' + dt.getSeconds() +
+												 '&minute=' + dt.getMinutes() +
+												 '&hour=' + dt.getHours(), true);
 					xmlHttp.send();
 					dayOfWeekIsUpd = false;
 				}
@@ -531,10 +535,10 @@
 				}
 			}
 
-			function setDateTime() {
+			/*function setDateTime() {
 				setTime();				
 				setDate();
-			}
+			}*/
 
 			function set_schRange(dw) {
 				offset = (dw - 1) * 8;
