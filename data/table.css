@@ -1,6 +1,7 @@
 table, th, td {
+	all: none;
 	-border: 1px solid black;
-	border-collapse: collapse;
+	border-collapse: collapse;	
 }
 th, td {
 	padding: 0px;

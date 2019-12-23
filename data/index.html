@@ -183,22 +183,13 @@
 						<td colspan="2"><hr>FW & FS Update</td>
 					</tr>
 					<tr>
-						<td>FW: <a href="https://github.com/discover1977/TCasper/raw/master/build/firmware.bin" download="firmware.bin"><button>Download</button></a></td>
-						<td>
-							<form method='POST' action='' enctype='multipart/form-data'>
-								<input type='file' accept='.bin' name='firmware'>
-								<input type='submit' value='Update Firmware'>
-							</form>							
+						<td style='font-family: Verdana;'>FW: <a href="https://github.com/discover1977/TCasper/raw/master/build/firmware.bin" download="firmware.bin"><button>Download</button></a></td style='Verdana ' >
+						<td rowspan="2">
+							<a href='/update'><button id='butFWUpdate'>FW Update</button></a>
 						</td>
 					</tr>
 					<tr>
-						<td>FS: <a href="https://github.com/discover1977/TCasper/raw/master/build/spiffs.bin" download="spiffs.bin"><button>Download</button></a></td>
-						<td>
-							<form method='POST' action='' enctype='multipart/form-data'>
-								<input type='file' accept='.bin' name='filesystem'>
-								<input type='submit' value='Update FileSystem'>
-							</form>
-						</td>
+						<td style='font-family: Verdana;'>FS: <a href="https://github.com/discover1977/TCasper/raw/master/build/spiffs.bin" download="spiffs.bin"><button>Download</button></a></td>
 					</tr>
 				</tbody>
 			</table>
