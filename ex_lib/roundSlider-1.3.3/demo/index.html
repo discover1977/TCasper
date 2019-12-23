@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>RoundSlider - A sample demo</title>
+		<script src="scripts/jquery-1.11.3.min.js"></script>
+		<link href="../src/rs.css" rel="stylesheet" />
+		<script src="../dist/roundslider.min.js"></script>
+	</head>
+	<body>
+		
+		<div id="slider"></div>
+		<script>
+			$("#slider").roundSlider({
+				sliderType: "default",
+				width: 25,
+				radius: "100",
+				value: 25,
+				animation: true,
+				circleShape: "custom-half",
+				lineCap: "round", 
+				min: "15",
+				max: "35",
+				handleSize: "+20",
+				startAngle: 359,
+				//lineCap: "round",
+				
+				change: function (args) {
+					// handle the change event here
+				}
+			});
+		</script>
+	</body>
+</html>

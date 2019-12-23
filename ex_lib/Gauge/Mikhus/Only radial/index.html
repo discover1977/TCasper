@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta name='viewport' content='width=device-width, initial-scale=1', charset="utf-8">
+		<script async src="gauge.min.js"></script>
+		<style>
+			* {box-sizing: border-box}
+
+			/* Set height of body and the document to 100% */
+			body, html {
+				height: 100%;
+				margin: 0;
+				font-family: Calibri;
+			}
+
+			/* Style tab links */
+			.tablink {
+				background-color: #555;
+				color: white;
+				float: left;
+				border: none;
+				outline: none;
+				cursor: pointer;
+				padding: 14px 16px;
+				font-size: 17px;
+				width: 50%;
+			}
+
+			.tablink:hover {
+				background-color: #777;
+			}
+
+			/* Style the tab content (and add height:100% for full page content) */
+			.tabcontent {
+				color: white;
+				display: none;
+				padding: 100px 20px;
+				height: 100%;
+			}
+
+			#Home {background-color: orange;}
+			#Settings{background-color: green;}
+
+			.footer {
+				padding: 5px;
+				text-align: center;
+				margin-bottom: 5px;
+			}
+			table, th, td {
+				border: 0px solid black;
+				border-collapse: collapse;
+			}
+			th, td {
+				padding: 5px;
+			}
+			th {
+				text-align: center;
+			}
+			tr {
+				text-align: center;
+			}
+			#butFWUpdate { width: 100px; height: 50px; border-radius: 10px; }
+		</style>
+	</head>
+	<body onload = 'process()'>
+
+		<button class="tablink" onclick = "openPage('Home', this, 'orange')" id="defaultOpen">Home</button>
+		<button class="tablink" onclick = "openPage('Settings', this, 'green')">Settings</button>
+
+		<div id="Home" class="tabcontent">
+			<table style='width:100%'>
+				<tr>
+					<td>
+ 						<canvas id="gTemp" ></canvas>
+					</td>				
+					<td>
+						<canvas id="gHum" ></canvas>						
+					</td>
+				</tr>
+			</table>
+		</div>
+
+		<div id = "Settings" class = "tabcontent">
+			<!--<img src="\image.png" alt="Image from ESP8266" width="128" height="128">-->
+			<footer>
+				<table style='width:100%'>
+					<tr>
+						<td><a href='/update'><button id='butFWUpdate'>FW Update</button></a></td>
+					</tr>
+				</table>
+			</footer>
+		</div>
+
+		<script>
+			xmlHttp = createXmlHttpObject();
+			
+			/* Функция создания XML объекта */
+			function createXmlHttpObject() {
+				if(window.XMLHttpRequest) {
+					xmlHttp = new XMLHttpRequest();
+				} else {
+					xmlHttp = new ActiveXObject('Microsoft.XMLHTTP');
+				}
+				return xmlHttp;
+			}
+
+			function openPage(pageName, elmnt, color) {
+				var i, tabcontent, tablinks;
+				tabcontent = document.getElementsByClassName("tabcontent");
+				for (i = 0; i < tabcontent.length; i++) {
+					tabcontent[i].style.display = "none";
+				}
+				tablinks = document.getElementsByClassName("tablink");
+				for (i = 0; i < tablinks.length; i++) {
+					tablinks[i].style.backgroundColor = "";
+				}
+				document.getElementById(pageName).style.display = "block";
+				elmnt.style.backgroundColor = color;
+			}
+			// Get the element with id="defaultOpen" and click on it
+			document.getElementById("defaultOpen").click();
+
+			/* Главная функция, вызывается при загрузке страницы */
+			/* Выполняет запрос XML данных, далее выполняет запрос */
+			/* по таймауту раз в секунду */
+			var temp = 25.6;
+			var hum = 53;
+
+			var gTemp = new RadialGauge({
+				renderTo: 'gTemp'
+			}).draw();
+			var gHum = new RadialGauge({
+			    	renderTo: 'gHum'
+			}).draw();
+
+			function process() {
+				if((xmlHttp.readyState == 0) || (xmlHttp.readyState == 4)) {
+					xmlHttp.onreadystatechange = function() {
+						if((xmlHttp.readyState == 4) && (xmlHttp.status == 200)) {
+							xmlDoc = xmlHttp.responseXML;
+			
+							xmlmsg = xmlDoc.getElementsByTagName('x_temp')[0].firstChild.nodeValue;	
+							//document.getElementById('html_temp').innerHTML = xmlmsg;	
+							//temp = xmlmsg;
+							
+							xmlmsg = xmlDoc.getElementsByTagName('x_hum')[0].firstChild.nodeValue;	
+							//document.getElementById('html_hum').innerHTML = xmlmsg;	
+							//hum = xmlmsg;
+						}
+					}
+					xmlHttp.open('PUT', 'xml', true);
+					xmlHttp.send(null);
+				}
+				setTimeout('process()', 1000);	// таймаут запроса XML
+			}							
+		</script>
+
+	</body>
+</html> 

@@ -302,7 +302,7 @@ void build_XML() {
 
 bool loadFromSpiffs(String path) {
   led_ctrl(HIGH);
-  Serial.print(F("load From Spiffs: "));
+  Serial.print(F("Request From Spiffs: "));
   Serial.println(path);
   String dataType = "text/plain";
   if(path.endsWith("/")) path += "index.html";
@@ -320,8 +320,8 @@ bool loadFromSpiffs(String path) {
   else if(path.endsWith(".pdf")) dataType = "application/pdf";
   else if(path.endsWith(".zip")) dataType = "application/zip";
   File dataFile = SPIFFS.open(path.c_str(), "r");
-  //Serial.print(F("File: "));
-  //Serial.println(dataFile.name());
+  Serial.print(F("Load File: "));
+  Serial.println(dataFile.name());
   if (server.hasArg("download")) dataType = "application/octet-stream";
   if (server.streamFile(dataFile, dataType) != dataFile.size()) {}
 

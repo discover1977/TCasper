@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>liteChart.js</title>
+		<style>
+			body{
+				font-family: 'Lato', sans-serif;
+			}
+		</style>
+	</head>
+	<body style="margin:0; padding:0;">
+
+		<div id="your-id" style="height: 400px; width: 50%;"></div>
+		<script>
+			var arr = [];
+			var labels = [];
+			var d;
+			document.addEventListener("DOMContentLoaded", function(){
+				// Create liteChart.js Object
+				d = new liteChart("chart");
+
+				d.animate.show = false;
+
+				d.axisY.maxValue = 100;				
+
+				for(var i = 0; i < 60; i++) {
+					labels[i] = (i + 1);
+					arr[i] = 0;
+				}
+
+				// Set labels
+				d.setLabels(labels);
+
+				// Set legends and values
+				d.addLegend({"name": "Test", "stroke": "#3b95f7", "fill": "#fff", "values": arr});
+
+				// Inject chart into DOM object
+				let div = document.getElementById("your-id");
+				d.inject(div);
+
+				// Draw
+				d.draw();
+				process();
+			});
+
+			var min = 0;
+			var max = 100;
+
+			function process() {
+				arr.shift();
+				arr.push(Math.random() * (max - min) + min);
+				d.draw();
+				setTimeout('process()', 500);
+			}	
+		</script>
+
+		<script src="lib/liteChart.js"></script>
+	</body>
+</html>
