@@ -142,45 +142,67 @@
 			</table>
 		</div>
 		<div id = "Settings" class = "tabcontent">
-			<!--<img src="\image.png" alt="Image from ESP8266" width="128" height="128">-->
 			<table style='width:100%'>
-				<tr>
-					<td id='date_sp' style = "font-size: 24px; width:50%;">00-00-0000</td>
-					<td id='time_sp' style = "font-size: 24px; width:50%;">00:00:00</td>
-				</tr>
-				<tr>
-					<td>
-						<button id='butSetDateTime' value ='' type='submit' onclick="setDate()">Установить дату</button>
-					</td>
-					<td>
-						<button id='butSetDateTime' value ='' type='submit' onclick="setTime()">Установить время</button>
-					</td>
-				</tr>
-				<tr>
-					<td colspan="2"><hr>AP Настройки</td>
-				</tr>
-				<tr>
-					<td colspan="2">
-						<form action="/wifi_param"  method="post">						
-							<label for="SSID">SSID: </label><br>
-							<input type="text" name="SSID" value=""><br>
-							<label for="stapass">Password: </label><br>
-							<input type="password" name="stapass"><br>
-							<input type="submit" value="Submit">
+				<tbody>
+					<tr>
+						<td id='date_sp' style = "font-size: 24px; width:50%;">00-00-0000</td>
+						<td id='time_sp' style = "font-size: 24px; width:50%;">00:00:00</td>
+					</tr>
+					<tr>
+						<td>
+							<button colspan="2" id='butSetDateTime' value ='' type='submit' onclick="setDate()">Установить дату</button>
 							<hr>
-						</form>
-					</td>
-				</tr>
-				<tr>
-					<td><button id='butFactoryDef' value ='' type='submit' onclick='factoryDef()'>Заводские настройки</button></td>
-					<td>
-						<a href="https://github.com/discover1977/TCasper/raw/master/build/firmware.bin" download="firmware.bin"><button>Download FW</button></a>
-						<a href="https://github.com/discover1977/TCasper/raw/master/build/spiffs.bin" download="spiffs.bin"><button>Download SPIFFS</button></a>
-						<a href='/update'><button id='butFWUpdate'>FW Update</button></a>		
-					</td>				
-				</tr>
+						</td>
+						<td>
+							<button colspan="2" id='butSetDateTime' value ='' type='submit' onclick="setTime()">Установить время</button>
+							<hr>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							AP Settings<br>
+							<form action="/wifi_param"  method="post">						
+								<label for="SSID">SSID: </label><br>
+								<input type="text" name="SSID" value=""><br>
+								<label for="stapass">Password: </label><br>
+								<input type="password" name="stapass"><br>
+								<input type="submit" value="Submit">
+							</form>
+						</td>
+						<td>
+							<br>
+							<br>
+							<br>
+							<button id='butFactoryDef' value ='' type='submit' onclick='factoryDef()'>Заводские настройки</button>
+							<br>
+							<br>
+							<br>
+						</td>
+					</tr>
+					<tr>
+						<td colspan="2"><hr>FW & FS Update</td>
+					</tr>
+					<tr>
+						<td>FW: <a href="https://github.com/discover1977/TCasper/raw/master/build/firmware.bin" download="firmware.bin"><button>Download</button></a></td>
+						<td>
+							<form method='POST' action='' enctype='multipart/form-data'>
+								<input type='file' accept='.bin' name='firmware'>
+								<input type='submit' value='Update Firmware'>
+							</form>							
+						</td>
+					</tr>
+					<tr>
+						<td>FS: <a href="https://github.com/discover1977/TCasper/raw/master/build/spiffs.bin" download="spiffs.bin"><button>Download</button></a></td>
+						<td>
+							<form method='POST' action='' enctype='multipart/form-data'>
+								<input type='file' accept='.bin' name='filesystem'>
+								<input type='submit' value='Update FileSystem'>
+							</form>
+						</td>
+					</tr>
+				</tbody>
 			</table>
-			<hr>		
+			<!--<img src="\image.png" alt="Image from ESP8266" width="128" height="128">-->		
 		</div>
 		<script>
 			xmlHttp = createXmlHttpObject();
