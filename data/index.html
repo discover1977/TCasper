@@ -74,34 +74,38 @@
 		<div id = "Schedule" class="tabcontent">
 			<table style='width: 100%;'>
 				<tr>
-					<td>
+					<td id='date_sch' style = "font-size: 24px; width:50%;">00-00-0000</td>
+					<td id='time_sch' style = "font-size: 24px; width:50%;">00:00:00</td>
+				</tr>
+				<tr>
+					<td colspan="2">
 						<div class="range-slider">
 							<input type="text" class="js-range-slider-1" value="1"/>
 						</div>
 					</td>
 				</tr>
 				<tr>
-					<td>
+					<td colspan="2">
 						<div class="range-slider">
 							<input type="text" class="js-range-slider-2" value="2"/>
 						</div>
 					</td>
 				</tr>
 				<tr>
-					<td>
+					<td colspan="2">
 						<div class="range-slider">
 							<input type="text" class="js-range-slider-3" value="3"/>
 						</div>
 					</td>
 				</tr>
 				<tr>
-					<td>
+					<td colspan="2">
 						<div class="range-slider">
 							<input type="text" class="js-range-slider-4" value="5"/>
 						</div>
 					</td>
 				</tr>
-					<td>
+					<td colspan="2">
 						<div class="flex-container">
 							<div class='form_radio_group-item'>
 								<input type='radio' name='dow' id='mo' value="1" onchange = "chDayOfWeek(this.value)" checked>
@@ -134,6 +138,7 @@
 						</div>
 					</td>
 				</tr>
+
 			</table>
 		</div>
 		<div id = "Settings" class = "tabcontent">
@@ -381,11 +386,13 @@
 								xmlmsg = xmlDoc.getElementsByTagName('x_time')[0].firstChild.nodeValue;
 								document.getElementById('time').innerHTML = xmlmsg;	
 								document.getElementById('time_sp').innerHTML = xmlmsg;	
+								document.getElementById('time_sch').innerHTML = xmlmsg;
 							}
 							if(!dateEdit) {
 								xmlmsg = xmlDoc.getElementsByTagName('x_date')[0].firstChild.nodeValue;
 								document.getElementById('date').innerHTML = xmlmsg;	
-								document.getElementById('date_sp').innerHTML = xmlmsg;	
+								document.getElementById('date_sp').innerHTML = xmlmsg;
+								document.getElementById('date_sch').innerHTML = xmlmsg;	
 							}
 							if(tmpChBCtrl != lCtrl)	{
 								chSetCtrl(lCtrl);	
