@@ -1,6 +1,0 @@
-https://codyshop.ru/litechart-library-for-chart-creation/
-https://www.chartjs.org/docs/latest/
-
-http://gionkunz.github.io/chartist-js/
-
-https://apexcharts.com/
